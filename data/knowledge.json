@@ -1,0 +1,61 @@
+{
+  "owner": "Vineeth Reddy Kodakandla",
+  "updated": "2026-06",
+  "chunks": [
+    {
+      "id": "intro",
+      "title": "Who I am",
+      "text": "Vineeth Reddy Kodakandla is an AI/ML engineer who builds AI systems that make it out of the notebook and into production. He recently completed an MS in Computer Science at Texas A&M University–Corpus Christi (2026). His work centers on agentic systems: giving LLMs memory, tools, and enough structure to act dependably instead of just impressively in a demo. He is targeting AI/ML Engineer, Applied AI, and Forward Deployed Engineer roles, and is open to relocating anywhere."
+    },
+    {
+      "id": "edith",
+      "title": "Project: Edith (multi-agent platform)",
+      "text": "Edith is a multi-agent platform with long-term memory consolidation and RAG, containerized for deployment. It solves a core failure of single-agent LLM setups: they forget everything between sessions and drift off task. Edith's agents retain and reuse context across sessions. The hard engineering problem was the memory layer and keeping a team of agents coordinated and reliable, not the model itself. Stack: Python, LangGraph, CrewAI, RAG, Mem0, Docker, Kubernetes."
+    },
+    {
+      "id": "pathwise",
+      "title": "Project: PathwiseAI (network AIOps, most FDE-aligned)",
+      "text": "PathwiseAI is a network operations / AIOps tool and Vineeth's most Forward-Deployed-Engineer-aligned project. Network operators normally react to SLA violations after they happen and write policy in raw NETCONF. PathwiseAI predicts SLA violations early using an LSTM model, lets operators write policy in plain English instead of NETCONF, and runs every change through a digital-twin layer that validates it before it touches the live network. It has a React/TypeScript operator dashboard and was benchmarked against Cisco, VMware, and Fortinet. It was built around a real operator's workflow, not just a model. Stack: Python, LSTM, React, TypeScript, NETCONF, digital twin."
+    },
+    {
+      "id": "pathfinders",
+      "title": "Project: Pathfinders (full-stack CI/CD analytics)",
+      "text": "Pathfinders is a full-stack CI/CD analytics platform with a FastAPI backend, a React frontend, Redis and TimescaleDB for time-series pipeline data, and automation through GitHub Actions. It demonstrates Vineeth's full-stack and MLOps/infrastructure breadth."
+    },
+    {
+      "id": "research",
+      "title": "Research: rule-based multi-agent access control",
+      "text": "Vineeth's graduate research, done as a graduate research assistant under faculty mentor Dr. Carlos Rubio-Medrano, built an ABAC/XACML multi-agent system: a deterministic, rule-based counterpart to LLM agents for cooperative access-control decisions. This gives him a strong instinct for where probabilistic LLM agents need guardrails — when to trust the model and when to constrain it."
+    },
+    {
+      "id": "skills",
+      "title": "Skills and stack",
+      "text": "Agents & LLMs: LangGraph, CrewAI, RAG, Mem0, LoRA/QLoRA, evaluation and prompting. MLOps & infrastructure: Docker, Kubernetes, AWS, FastAPI, GitHub Actions, CI/CD. Languages: Python, TypeScript, SQL. Data & frontend: React, PostgreSQL, TimescaleDB, Redis."
+    },
+    {
+      "id": "experience",
+      "title": "Teaching and assistantship experience",
+      "text": "During his MS, Vineeth worked as a graduate/teaching assistant under Dr. Carlos Rubio-Medrano and teaching-assisted a Computer Forensics course. His graduate coursework included Computer Architecture, Advanced Software Engineering, Network Security, and Agent-Based Systems."
+    },
+    {
+      "id": "looking-for",
+      "title": "What I'm looking for",
+      "text": "Vineeth is open to work and targeting AI/ML Engineer, Applied AI, and Forward Deployed Engineer roles. He is open to relocating anywhere. He is most interested in teams building products where models have to work in front of real users — production AI, not research demos."
+    },
+    {
+      "id": "approach",
+      "title": "How I think about engineering",
+      "text": "Vineeth cares most about the seam where a model meets a real user and has to keep working. He values reliability, evaluation, and the unglamorous MLOps plumbing that turns a clever prototype into a system people can depend on. His research in deterministic rule-based systems informs how he adds guardrails around probabilistic LLM behavior."
+    },
+    {
+      "id": "faq-authorization",
+      "title": "FAQ: work authorization",
+      "text": "EDIT THIS CHUNK to reflect how you want to answer questions about work authorization / sponsorship. Recruiters do ask the chatbot this. Keep it factual and brief, and phrase it however you're comfortable with. You can also delete this chunk entirely if you'd rather handle the topic only in live conversation."
+    },
+    {
+      "id": "contact",
+      "title": "FAQ: how to get in touch",
+      "text": "The best way to reach Vineeth is by email (see the contact section of the site) or via LinkedIn. He responds to recruiters and engineers building production AI. Links to his GitHub, LinkedIn, and resume are in the site's contact section."
+    }
+  ]
+}
