@@ -75,6 +75,28 @@ export default function Home() {
             <article className="proj">
               <div className="proj-top">
                 <div>
+                  <div className="domain">Agentic memory · LLMs</div>
+                  <h3>ANANTA</h3>
+                  <div className="tagline">An agent memory that forgets — on purpose.</div>
+                </div>
+                <span className="badge">Live · interactive</span>
+              </div>
+              <p>Most &quot;agent memory&quot; is a vector store that grows forever. ANANTA models memory the way people do: an <strong>Ebbinghaus forgetting curve</strong> decays each memory, <strong>recall reinforces it</strong> (spaced repetition), a decay pass prunes what has faded, and every write is <strong>SHA-256 hash-chained into a tamper-evident audit log</strong> you can try to break. On top sits <strong>confidence-banded model routing</strong> (memory → 8B → 70B → frontier) and a <strong>Reflexion agent loop</strong> — plan → recall → retrieve (RAG) → route → draft → self-check → abstain-or-answer. Runs entirely in your browser; bring a Groq key for real model answers.</p>
+              <div className="proj-links">
+                <a href="https://vineethkodakandla.github.io/ananta-lab/" target="_blank" rel="noopener">Live demo →</a>
+                <a href="https://github.com/vineethkodakandla/ananta-lab" target="_blank" rel="noopener">Source</a>
+              </div>
+              <div className="stack">
+                <span className="chip">JavaScript</span><span className="chip">Web Crypto</span><span className="chip">RAG</span>
+                <span className="chip">Model routing</span><span className="chip">Reflexion</span><span className="chip">Zero-dependency</span>
+              </div>
+            </article>
+          </Reveal>
+
+          <Reveal>
+            <article className="proj">
+              <div className="proj-top">
+                <div>
                   <div className="domain">Multi-agent systems · LLMs</div>
                   <h3>Edith</h3>
                   <div className="tagline">Agents that actually remember.</div>
