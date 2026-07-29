@@ -99,16 +99,19 @@ export default function Home() {
                 <div>
                   <div className="domain">Multi-agent systems · LLMs</div>
                   <h3>Edith</h3>
-                  <div className="tagline">Agents that actually remember.</div>
+                  <div className="tagline">A governed team of agents.</div>
                   <ViewCount projectId="edith" />
                 </div>
-                <span className="badge">Flagship</span>
+                <span className="badge">Live · interactive</span>
               </div>
-              <p>Single-agent LLM setups forget everything between sessions and drift off task. Edith is a <strong>multi-agent platform with long-term memory consolidation and RAG</strong>, containerized for deployment — agents retain and reuse context across sessions instead of being impressive once and useless twice. The hard part wasn&apos;t the model; it was the memory layer and keeping a team of agents coordinated and reliable.</p>
-              <span className="metric"><b>impact:</b> [ add metric — retrieval accuracy, task success rate, or latency ]</span>
+              <p>Most multi-agent demos are just agents chatting. Edith is a <strong>governed team</strong>: an orchestrator dispatches specialists over a shared blackboard — <strong>Researcher (RAG) → Analyst → Critic (Reflexion) → Synthesizer</strong> — then a <strong>Governor policy gate</strong> blocks any recommendation that isn&apos;t grounded, hedged, and actionable, forcing a revision. It behaves honestly: on an off-corpus question it refuses to ship a confident guess and escalates for human review.</p>
+              <div className="proj-links">
+                <a href="https://vineethkodakandla.github.io/edith-lab/" target="_blank" rel="noopener">Live demo →</a>
+                <a href="https://github.com/vineethkodakandla/edith-lab" target="_blank" rel="noopener">Source</a>
+              </div>
               <div className="stack">
-                <span className="chip">Python</span><span className="chip">LangGraph</span><span className="chip">CrewAI</span>
-                <span className="chip">RAG</span><span className="chip">Mem0</span><span className="chip">Docker</span><span className="chip">Kubernetes</span>
+                <span className="chip">Multi-agent</span><span className="chip">Orchestration</span><span className="chip">Reflexion</span>
+                <span className="chip">Governance</span><span className="chip">RAG</span><span className="chip">Zero-dependency</span>
               </div>
             </article>
           </Reveal>
