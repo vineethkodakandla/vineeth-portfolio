@@ -1,6 +1,6 @@
 {
   "owner": "Vineeth Reddy Kodakandla",
-  "updated": "2026-06",
+  "updated": "2026-08",
   "chunks": [
     {
       "id": "intro",
@@ -11,6 +11,11 @@
       "id": "edith",
       "title": "Project: Edith (multi-agent platform)",
       "text": "Edith is a multi-agent platform with long-term memory consolidation and RAG, containerized for deployment. It solves a core failure of single-agent LLM setups: they forget everything between sessions and drift off task. Edith's agents retain and reuse context across sessions. The hard engineering problem was the memory layer and keeping a team of agents coordinated and reliable, not the model itself. Stack: Python, LangGraph, CrewAI, RAG, Mem0, Docker, Kubernetes."
+    },
+    {
+      "id": "edge-vision",
+      "title": "Project: Meteor Lake Latency Lab (edge inference benchmarking)",
+      "text": "The Meteor Lake Latency Lab is Vineeth's edge-inference and performance-engineering project, and the one that best shows his systems and measurement discipline rather than his agent work. It runs real-time instance segmentation (YOLOv8n-seg at 640x640) on an Intel Core Ultra 7 155H across all three processors that share the chip's package power budget — the NPU, the Arc integrated GPU, and the CPU — using OpenVINO, with INT8 post-training quantization via NNCF. A 33.3 ms per-frame budget (30 fps) was fixed before any measurement, and twelve configurations were scored pass/fail against it. The headline result is that the correct device depends on duty cycle: running inference back-to-back, the iGPU has the best median (11.3 ms) but a 47 ms p99, while the NPU holds an 18 ms p99; on a real 30 fps webcam the same iGPU configuration runs 10.4 ms median and 13.3 ms p99 and beats the NPU on both, because it idles roughly 70 percent of each frame interval. Measuring only the saturated case would have recommended the wrong processor. He also found the tail was not an inference problem at all: on the frames that missed the budget, inference time was normal while the CPU-side preprocess and postprocess stalled for 30 to 137 ms, and iGPU load produced 63 such stalls per 4000 frames against the NPU's 6. Rigor points he can speak to: calibration and evaluation sets are disjoint (COCO val2017 split 300/4700) so the INT8 accuracy is not flattered; his hand-written NumPy postprocess was verified against the reference implementation at 371 of 371 detections matching at IoU 0.9; two INT8 variants were built so the mixed-precision decision was measured rather than assumed, showing that excluding the detection-head decode costs 0.0015 box mAP while quantizing it costs 0.0389, 26 times more, for 0.35 ms. He is explicit about limits: power was never measured, and the stall mechanism is reported as unattributed because separating compositor contention from power droop would need tracing he did not do. Stack: Python, OpenVINO, NNCF, INT8 quantization, NPU/iGPU/CPU targeting, OpenCV, benchmarking and statistics. Live report: https://vineethkodakandla.github.io/edge-vision-lab/ — source: https://github.com/vineethkodakandla/edge-vision-lab"
     },
     {
       "id": "pathwise",

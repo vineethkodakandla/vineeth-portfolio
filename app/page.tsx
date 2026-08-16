@@ -117,6 +117,30 @@ export default function Home() {
           </Reveal>
 
           <Reveal>
+            <article className="proj">
+              <div className="proj-top">
+                <div>
+                  <div className="domain">Edge inference · Performance engineering</div>
+                  <h3>Meteor Lake Latency Lab</h3>
+                  <div className="tagline">The fastest processor was the wrong one.</div>
+                  <ViewCount projectId="edge-vision" />
+                </div>
+                <span className="badge">Measured on-device</span>
+              </div>
+              <p>Most &quot;I ran it on the NPU&quot; write-ups report a median and stop. This one fixes a <strong>33.3 ms per-frame budget first</strong>, then measures real-time instance segmentation across <strong>all three processors that share one package power budget</strong> — NPU, Arc iGPU and CPU — over twelve configurations with <strong>INT8 post-training quantization</strong>. The finding is that <strong>the right device depends on duty cycle</strong>: saturated, the iGPU posts the best median and a 47 ms p99; on a real 30 fps webcam the same configuration runs a 13.3 ms p99 and wins outright. The tail turned out not to be inference at all — on the bad frames the model is fine and the <strong>CPU-side stages stall for 30–137 ms</strong>. Reporting only the benchmark would have shipped the wrong chip.</p>
+              <span className="metric"><b>measured:</b> 13.3 ms p99 over 2,398 live frames · INT8 costs 0.0024 box mAP on held-out COCO · postprocess verified 371/371 against the reference decoder</span>
+              <div className="proj-links">
+                <a href="https://vineethkodakandla.github.io/edge-vision-lab/" target="_blank" rel="noopener">Read the report →</a>
+                <a href="https://github.com/vineethkodakandla/edge-vision-lab" target="_blank" rel="noopener">Source</a>
+              </div>
+              <div className="stack">
+                <span className="chip">OpenVINO</span><span className="chip">NNCF</span><span className="chip">INT8 PTQ</span>
+                <span className="chip">NPU</span><span className="chip">Python</span><span className="chip">Benchmarking</span>
+              </div>
+            </article>
+          </Reveal>
+
+          <Reveal>
             <article className="proj alert">
               <div className="proj-top">
                 <div>
