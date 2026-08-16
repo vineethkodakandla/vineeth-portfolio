@@ -14,8 +14,8 @@
     },
     {
       "id": "edith",
-      "title": "Project: Edith (multi-agent platform)",
-      "text": "Edith is a multi-agent platform with long-term memory consolidation and RAG, containerized for deployment. It solves a core failure of single-agent LLM setups: they forget everything between sessions and drift off task. Edith's agents retain and reuse context across sessions. The hard engineering problem was the memory layer and keeping a team of agents coordinated and reliable, not the model itself. Stack: Python, LangGraph, CrewAI, RAG, Mem0, Docker, Kubernetes."
+      "title": "Project: Edith (governed multi-agent orchestrator)",
+      "text": "Edith is Vineeth's multi-agent orchestration project and the companion piece to ANANTA. Its argument is that most multi-agent demos are just agents chatting, which produces confident-sounding output nobody has checked. Edith is instead a governed team: an orchestrator dispatches specialists over a shared blackboard in a fixed pipeline — Researcher, which retrieves via RAG, then Analyst, then Critic, which runs a Reflexion self-critique pass, then Synthesizer. A Governor policy gate sits at the end and blocks any recommendation that is not grounded, hedged and actionable, sending it back for revision rather than releasing it. The behaviour Vineeth cares about most is what it does when it cannot answer: asked something off-corpus, it refuses to ship a confident guess and escalates for human review instead. Where ANANTA is about what a single agent remembers and forgets, Edith is about how a team of agents is governed, so the two are deliberately distinct rather than variations on one demo. Like ANANTA it is an interactive browser demo with zero dependencies, and a visitor can supply their own Groq API key for real model answers. Live demo: https://vineethkodakandla.github.io/edith-lab/ — source: https://github.com/vineethkodakandla/edith-lab. Stack: multi-agent orchestration, blackboard architecture, Reflexion, policy-gate governance, RAG, zero-dependency JavaScript."
     },
     {
       "id": "edge-vision",
