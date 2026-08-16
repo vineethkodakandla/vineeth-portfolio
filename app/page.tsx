@@ -60,7 +60,7 @@ export default function Home() {
       <div className="telemetry">
         <div className="wrap tel-grid">
           <div className="tel"><div className="k">Education</div><div className="v">MS Computer Science<br /><span>Texas A&amp;M–Corpus Christi · 2026</span></div></div>
-          <div className="tel"><div className="k">Focus</div><div className="v">Agentic systems<br /><span>RAG · MLOps · production AI</span></div></div>
+          <div className="tel"><div className="k">Focus</div><div className="v">Agentic &amp; on-device AI<br /><span>RAG · quantization · MLOps</span></div></div>
           <div className="tel"><div className="k">Core stack</div><div className="v">Python · TypeScript<br /><span>LangGraph · K8s · AWS</span></div></div>
           <div className="tel"><div className="k">Based</div><div className="v">NYC metro area<br /><span>Open to remote</span></div></div>
         </div>

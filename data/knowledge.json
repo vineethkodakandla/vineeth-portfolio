@@ -5,7 +5,7 @@
     {
       "id": "intro",
       "title": "Who I am",
-      "text": "Vineeth Reddy Kodakandla is an AI/ML engineer who builds AI systems that make it out of the notebook and into production. He recently completed an MS in Computer Science at Texas A&M University–Corpus Christi (2026). His work centers on agentic systems: giving LLMs memory, tools, and enough structure to act dependably instead of just impressively in a demo. He is targeting AI/ML Engineer, Applied AI, and Forward Deployed Engineer roles, and is open to relocating anywhere."
+      "text": "Vineeth Reddy Kodakandla is an AI/ML engineer who builds AI systems that make it out of the notebook and into production. He recently completed an MS in Computer Science at Texas A&M University–Corpus Christi (2026). His work runs along two tracks. The first is agentic systems: giving LLMs memory, tools, and enough structure to act dependably instead of just impressively in a demo. The second is on-device inference and performance: quantizing models and measuring what they actually cost in latency, jitter and accuracy on real hardware, rather than trusting a vendor benchmark. He is targeting AI/ML Engineer, Applied AI, Inference/Performance Engineer, and Forward Deployed Engineer roles, and is open to relocating anywhere."
     },
     {
       "id": "ananta",
