@@ -8,6 +8,11 @@
       "text": "Vineeth Reddy Kodakandla is an AI/ML engineer who builds AI systems that make it out of the notebook and into production. He recently completed an MS in Computer Science at Texas A&M University–Corpus Christi (2026). His work centers on agentic systems: giving LLMs memory, tools, and enough structure to act dependably instead of just impressively in a demo. He is targeting AI/ML Engineer, Applied AI, and Forward Deployed Engineer roles, and is open to relocating anywhere."
     },
     {
+      "id": "ananta",
+      "title": "Project: ANANTA (agent memory that forgets on purpose)",
+      "text": "ANANTA is Vineeth's agentic-memory project and the first piece of work featured on his site. It attacks a specific failure of most 'agent memory': a vector store that only ever grows, so retrieval quality decays as the corpus fills with stale facts. ANANTA models memory the way people do. An Ebbinghaus forgetting curve decays every memory over time, recall reinforces it in the manner of spaced repetition, and a periodic decay pass prunes what has faded. Every write is SHA-256 hash-chained into a tamper-evident audit log that a visitor can actively try to break in the live demo. On top of the memory layer sit two things: confidence-banded model routing, which escalates from memory to an 8B model to a 70B model to a frontier model only as confidence demands, and a Reflexion agent loop that runs plan, recall, retrieve via RAG, route, draft, self-check, then either answers or abstains. The abstain path is deliberate: it is built to decline rather than guess. It runs entirely in the browser with zero dependencies, and a visitor can supply their own Groq API key to get real model answers. Live demo: https://vineethkodakandla.github.io/ananta-lab/ — source: https://github.com/vineethkodakandla/ananta-lab. Stack: JavaScript, Web Crypto, RAG, model routing, Reflexion, zero-dependency."
+    },
+    {
       "id": "edith",
       "title": "Project: Edith (multi-agent platform)",
       "text": "Edith is a multi-agent platform with long-term memory consolidation and RAG, containerized for deployment. It solves a core failure of single-agent LLM setups: they forget everything between sessions and drift off task. Edith's agents retain and reuse context across sessions. The hard engineering problem was the memory layer and keeping a team of agents coordinated and reliable, not the model itself. Stack: Python, LangGraph, CrewAI, RAG, Mem0, Docker, Kubernetes."
@@ -35,7 +40,7 @@
     {
       "id": "skills",
       "title": "Skills and stack",
-      "text": "Agents & LLMs: LangGraph, CrewAI, RAG, Mem0, LoRA/QLoRA, evaluation and prompting. MLOps & infrastructure: Docker, Kubernetes, AWS, FastAPI, GitHub Actions, CI/CD. Languages: Python, TypeScript, SQL. Data & frontend: React, PostgreSQL, TimescaleDB, Redis."
+      "text": "Agents & LLMs: LangGraph, CrewAI, RAG, Mem0, LoRA/QLoRA, evaluation and prompting. Inference & edge: OpenVINO, NNCF, INT8 post-training quantization, targeting NPU / integrated GPU / CPU backends, latency and jitter profiling, OpenCV. MLOps & infrastructure: Docker, Kubernetes, AWS, FastAPI, GitHub Actions, CI/CD. Languages: Python, TypeScript, SQL. Data & frontend: React, PostgreSQL, TimescaleDB, Redis. The inference and edge skills are demonstrated end to end in the Meteor Lake Latency Lab project rather than only listed: quantizing a segmentation model, targeting three different processors through one runtime, and reporting latency distributions and the accuracy cost honestly, including the limits of the study."
     },
     {
       "id": "experience",
@@ -54,8 +59,8 @@
     },
     {
       "id": "faq-authorization",
-      "title": "FAQ: work authorization",
-      "text": "EDIT THIS CHUNK to reflect how you want to answer questions about work authorization / sponsorship. Recruiters do ask the chatbot this. Keep it factual and brief, and phrase it however you're comfortable with. You can also delete this chunk entirely if you'd rather handle the topic only in live conversation."
+      "title": "FAQ: work authorization and sponsorship",
+      "text": "Vineeth is authorized to work in the United States now. He is an F-1 student on OPT following his MS in Computer Science at Texas A&M University-Corpus Christi, so he can start without any action from an employer. Longer term he will need H-1B sponsorship to continue beyond OPT. He is happy to talk through timelines and specifics directly, and he would rather know early whether a team is able to sponsor than find out late in a process. Roles that require US citizenship or an active security clearance are not a fit."
     },
     {
       "id": "contact",

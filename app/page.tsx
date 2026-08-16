@@ -152,7 +152,6 @@ export default function Home() {
                 <span className="badge flag">Most FDE-aligned</span>
               </div>
               <p>Network operators react to SLA violations after they hit and write policy in raw NETCONF. PathwiseAI <strong>predicts SLA violations early with an LSTM model</strong>, lets operators write policy in plain English, and runs every change through a <strong>digital-twin layer that validates it before it touches the live network</strong> — behind a React/TypeScript operator dashboard. Benchmarked against Cisco, VMware, and Fortinet. Built around a real operator&apos;s workflow, not just a model.</p>
-              <span className="metric"><b>impact:</b> [ add metric — % of violations flagged early, or config-time reduction ]</span>
               <div className="stack">
                 <span className="chip">Python</span><span className="chip">LSTM</span><span className="chip">React</span>
                 <span className="chip">TypeScript</span><span className="chip">NETCONF</span><span className="chip">Digital twin</span>
@@ -184,6 +183,7 @@ export default function Home() {
           <Reveal>
             <div className="caps">
               <div className="cap"><h4>Agents &amp; LLMs</h4><ul><li>LangGraph</li><li>CrewAI</li><li>RAG</li><li>Mem0</li><li>LoRA / QLoRA</li><li>Eval &amp; prompting</li></ul></div>
+              <div className="cap"><h4>Inference &amp; Edge</h4><ul><li>OpenVINO</li><li>NNCF · INT8 PTQ</li><li>NPU · iGPU targeting</li><li>Latency &amp; jitter profiling</li><li>OpenCV</li></ul></div>
               <div className="cap"><h4>MLOps &amp; Infra</h4><ul><li>Docker</li><li>Kubernetes</li><li>AWS</li><li>FastAPI</li><li>GitHub Actions</li></ul></div>
               <div className="cap"><h4>Languages &amp; Data</h4><ul><li>Python</li><li>TypeScript</li><li>SQL</li><li>React</li><li>PostgreSQL</li><li>TimescaleDB · Redis</li></ul></div>
               <div className="cap now"><h4>Currently</h4><ul><li>AWS Machine Learning – Specialty (in progress)</li></ul></div>
