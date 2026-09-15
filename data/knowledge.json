@@ -5,12 +5,12 @@
     {
       "id": "intro",
       "title": "Who Vineeth is",
-      "text": "Vineeth Reddy Kodakandla is an ML engineer based in New Jersey who works on model inference and evaluation: how fast and how cheaply models run on real hardware, and whether their output holds up. He completed an M.S. in Computer Science at Texas A&M University-Corpus Christi (August 2024 to May 2026). Before that he worked on LLM serving at EXL (Noida, India, 2023 to 2024) and on real-time vision inference at L&T Technology Services (Bengaluru, India, 2022 to 2023). His public projects are measurement studies: bitwise-forensics, which measures whether a continuous-batching engine returns the same greedy tokens when requests are batched together; the Meteor Lake Latency Lab, which measures which processor on an Intel laptop chip should run live instance segmentation; and the LLM Eval Observatory, a nightly evaluation of open-weight models on anti-money-laundering alert triage. Every measured result on his site links to the committed file it came from."
+      "text": "Vineeth Reddy Kodakandla is an ML engineer based in the United States who works on model inference and evaluation: how fast and how cheaply models run on real hardware, and whether their output holds up. He completed an M.S. in Computer Science at Texas A&M University-Corpus Christi (August 2024 to May 2026). Before that he worked on LLM serving at EXL (Noida, India, 2023 to 2024) and on real-time vision inference at L&T Technology Services (Bengaluru, India, 2022 to 2023). His public projects are measurement studies: bitwise-forensics, which measures whether a continuous-batching engine returns the same greedy tokens when requests are batched together; the Meteor Lake Latency Lab, which measures which processor on an Intel laptop chip should run live instance segmentation; and the LLM Eval Observatory, a nightly evaluation of open-weight models on anti-money-laundering alert triage. Every measured result on his site links to the committed file it came from."
     },
     {
       "id": "looking-for",
       "title": "Roles he is looking for",
-      "text": "Vineeth is looking for ML engineer, inference engineer and software engineering roles, especially work on model serving, performance and evaluation. He is based in New Jersey and open to relocation and to remote work. The best way to start a conversation is email at vineethkodakandla@gmail.com."
+      "text": "Vineeth is looking for ML engineer, inference engineer and software engineering roles, especially work on model serving, performance and evaluation. He is based in the United States and open to relocating anywhere in the US. The best way to start a conversation is email at vineethkodakandla@gmail.com."
     },
     {
       "id": "faq-authorization",

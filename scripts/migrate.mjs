@@ -31,14 +31,14 @@ const statements = [
   `CREATE INDEX IF NOT EXISTS kb_chunks_embedding_hnsw
      ON kb_chunks USING hnsw (embedding vector_cosine_ops)`,
 
-  // 2. Contact form submissions.
+  // 2. Contact form submissions. No IP address or user agent is kept. (Databases
+  //    created before Sep 2026 also have nullable ip and user_agent columns, which
+  //    the site no longer writes.)
   `CREATE TABLE IF NOT EXISTS contact_submissions (
      id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
      name        TEXT NOT NULL,
      email       TEXT NOT NULL,
      message     TEXT NOT NULL,
-     ip          TEXT,
-     user_agent  TEXT,
      email_sent  BOOLEAN NOT NULL DEFAULT false,
      created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
    )`,

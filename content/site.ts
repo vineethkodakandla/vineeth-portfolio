@@ -4,7 +4,7 @@
 export const SITE = {
   name: "Vineeth Reddy Kodakandla",
   role: "ML engineer",
-  location: "New Jersey, USA",
+  location: "United States",
   email: "vineethkodakandla@gmail.com",
   github: "https://github.com/vineethkodakandla",
   linkedin: "https://www.linkedin.com/in/vineethkodakandla",

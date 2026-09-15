@@ -11,6 +11,8 @@ export async function POST(req: Request) {
   const rejected = crossSiteRejection(req);
   if (rejected) return rejected;
 
+  // The IP is used only as a rate-limit key (hashed in checkLimit). Neither it nor
+  // the user agent is stored with the message.
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
   const allowed = await checkLimit(contactLimiter, ip, 5, "contact");
@@ -36,14 +38,13 @@ export async function POST(req: Request) {
   }
 
   const { name, email, message } = parsed.data;
-  const ua = req.headers.get("user-agent") || "";
 
   let id: number | null = null;
   if (sql) {
     try {
       const rows = await sql`
-        INSERT INTO contact_submissions (name, email, message, ip, user_agent)
-        VALUES (${name}, ${email}, ${message}, ${ip}, ${ua})
+        INSERT INTO contact_submissions (name, email, message)
+        VALUES (${name}, ${email}, ${message})
         RETURNING id`;
       id = (rows as any)[0]?.id ?? null;
     } catch (e) {

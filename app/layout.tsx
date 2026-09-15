@@ -69,7 +69,7 @@ const personJsonLd = {
   url: SITE.url,
   email: `mailto:${SITE.email}`,
   sameAs: [SITE.github, SITE.linkedin],
-  address: { "@type": "PostalAddress", addressRegion: "NJ", addressCountry: "US" },
+  address: { "@type": "PostalAddress", addressCountry: "US" },
   alumniOf: { "@type": "CollegeOrUniversity", name: "Texas A&M University-Corpus Christi" },
   knowsAbout: ["Model inference", "LLM serving", "LLM evaluation", "Quantization", "OpenVINO"],
 };

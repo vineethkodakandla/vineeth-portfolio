@@ -110,8 +110,8 @@ export default function Home() {
           </a>
         </div>
         <p className="availability">
-          Open to ML engineer, inference and software engineering roles. Based in New Jersey, open to relocation and
-          remote work.
+          Open to ML engineer, inference and software engineering roles. Based in the United States and open to
+          relocating anywhere in the US.
         </p>
       </section>
 
