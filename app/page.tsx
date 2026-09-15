@@ -146,13 +146,13 @@ export default function Home() {
                 <div>
                   <div className="domain">LLM serving · Reproducibility</div>
                   <h3>bitwise-forensics</h3>
-                  <div className="tagline">Same prompt, greedy decoding, a different answer once it is batched.</div>
+                  <div className="tagline">Same prompt, greedy decoding: sharing engine steps can change the answer.</div>
                   <ViewCount projectId="bitwise" />
                 </div>
-                <span className="badge">Measured · 7,680 runs</span>
+                <span className="badge">Measured · 40 prompts · 2 devices</span>
               </div>
-              <p>Send a prompt to an LLM server alone, then again while other requests share its engine steps, and greedy decoding can return a different answer. This project measures how often, where the outputs fork, and which setting is responsible, on a <strong>real continuous-batching engine</strong>: OpenVINO GenAI serving Qwen2.5-Coder-0.5B INT4 on the Arc iGPU and CPU of a Core Ultra 7 155H, 12 configurations each. Under default settings, sharing steps changed the first 128 tokens in <strong>95.6–100% of iGPU runs and 54.4–72.5% of CPU runs</strong>. It is not randomness: <strong>replaying the same batch schedule reproduced all 320 runs bit for bit</strong>. On the CPU the lever was <strong>dynamic activation quantization</strong>: turning it off cut divergence from 71% to 21%, and adding an f32 KV cache took token changes to 0 of 640 runs, although logprobs still moved by up to 2.9e-5. On the iGPU no tested setting removed it.</p>
-              <span className="metric"><b>measured:</b> paired bootstrap CIs over prompts and trials · replay and drift controls · every headline number recomputed from raw per-token data</span>
+              <p>This project measures how often greedy output changes when other requests share engine steps, and what changes it, on a <strong>real continuous-batching engine</strong>: OpenVINO GenAI serving Qwen2.5-Coder-0.5B (INT4 weights) on a Core Ultra 7 155H&apos;s Arc iGPU and CPU, with 40 short templated prompts about inference topics. By default, sharing changed the output (up to 128 tokens) in <strong>95.6–100% of iGPU runs and 54.4–72.5% of CPU runs</strong>. It is not randomness: <strong>replaying the eight arrival schedules at rate c8 (8 arrivals per max-length generation) with default options reproduced tokens, chosen-token logprobs and batch sizes for all 320 runs per device</strong>. On the CPU the main lever was <strong>dynamic activation quantization</strong>: turning it off cut token changes from 71% to 21% at c8, and adding an f32 KV cache took them to 0 of 320 at c8 and at c32, though logprobs still moved by up to 2.9e-5. No tested iGPU setting removed them.</p>
+              <span className="metric"><b>measured:</b> paired bootstrap CIs over prompts and trials · replay control and repeated batch-of-1 baselines · raw per-token results, report code and analysis scripts in the repo</span>
               <div className="proj-links">
                 <a href="https://github.com/vineethkodakandla/bitwise-forensics#results" target="_blank" rel="noopener">Read the results →</a>
                 <a href="https://github.com/vineethkodakandla/bitwise-forensics" target="_blank" rel="noopener">Source</a>
@@ -207,7 +207,7 @@ export default function Home() {
           <Reveal>
             <div className="caps">
               <div className="cap"><h4>Agents &amp; LLMs</h4><ul><li>LangGraph</li><li>CrewAI</li><li>RAG</li><li>Mem0</li><li>LoRA / QLoRA</li><li>Eval &amp; prompting</li></ul></div>
-              <div className="cap"><h4>Inference &amp; Edge</h4><ul><li>OpenVINO</li><li>NNCF · INT8 PTQ</li><li>NPU · iGPU targeting</li><li>Latency &amp; jitter profiling</li><li>LLM serving · batch invariance</li><li>OpenCV</li></ul></div>
+              <div className="cap"><h4>Inference &amp; Edge</h4><ul><li>OpenVINO</li><li>NNCF · INT8 PTQ</li><li>NPU · iGPU targeting</li><li>Latency &amp; jitter profiling</li><li>LLM serving · reproducibility measurement</li><li>OpenCV</li></ul></div>
               <div className="cap"><h4>MLOps &amp; Infra</h4><ul><li>Docker</li><li>Kubernetes</li><li>AWS</li><li>FastAPI</li><li>GitHub Actions</li></ul></div>
               <div className="cap"><h4>Languages &amp; Data</h4><ul><li>Python</li><li>TypeScript</li><li>SQL</li><li>React</li><li>PostgreSQL</li><li>TimescaleDB · Redis</li></ul></div>
               <div className="cap now"><h4>Currently</h4><ul><li>AWS Machine Learning – Specialty (in progress)</li></ul></div>
