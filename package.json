@@ -10,7 +10,9 @@
     "db:migrate": "node --env-file=.env.local scripts/migrate.mjs",
     "embed": "node --env-file=.env.local scripts/embed.mjs",
     "db:setup": "npm run db:migrate && npm run embed",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check": "node scripts/check-content.mjs",
+    "check:links": "node scripts/check-links.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",
@@ -19,7 +21,6 @@
     "@upstash/ratelimit": "^2.1.0",
     "@upstash/redis": "^1.38.4",
     "cmdk": "^1.1.1",
-    "framer-motion": "^12.40.0",
     "next": "^16.3.5",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

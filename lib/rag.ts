@@ -4,66 +4,86 @@ import { sql } from "@/lib/db";
 export type Chunk = { id: string; title: string; text: string; score?: number };
 export type Retrieval = { mode: "rag" | "full"; chunks: Chunk[] };
 
-// Offline / no-database fallback: the whole knowledge base, bundled at build time.
-const JSON_CHUNKS: Chunk[] = (knowledge as any).chunks;
+// The bundled knowledge base is the only source of answer text. It ships with the
+// deployed pages, so the assistant cannot describe a different revision of the
+// site than the one being served, whatever order a deploy and `npm run embed`
+// happen in. The database only ranks chunk ids; if its rows do not match the
+// bundle (embedded from another revision), the whole bundle is used instead.
+const JSON_CHUNKS: Chunk[] = (knowledge as { chunks: Chunk[] }).chunks;
+const BY_ID = new Map(JSON_CHUNKS.map((c) => [c.id, c]));
+const FULL: Retrieval = { mode: "full", chunks: JSON_CHUNKS };
+const TIMEOUT_MS = 4000;
+
+function withTimeout<T>(work: PromiseLike<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`timed out after ${ms} ms`)), ms);
+    Promise.resolve(work).then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      },
+    );
+  });
+}
 
 async function embedQuery(text: string): Promise<number[] | null> {
   const key = process.env.VOYAGE_API_KEY;
   if (!key) return null;
-  const res = await fetch("https://api.voyageai.com/v1/embeddings", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify({
-      input: [text],
-      model: process.env.VOYAGE_MODEL || "voyage-3-lite",
-      input_type: "query",
-    }),
-  });
-  if (!res.ok) return null;
-  const json = await res.json();
-  return json?.data?.[0]?.embedding ?? null;
-}
-
-// All chunks straight from the DB (used when retrieval isn't possible but the DB is up).
-async function fullContextFromDb(): Promise<Retrieval> {
-  if (!sql) return { mode: "full", chunks: JSON_CHUNKS };
   try {
-    const rows = await sql`SELECT id, title, body AS text FROM kb_chunks`;
-    if (rows.length) return { mode: "full", chunks: rows as Chunk[] };
+    const res = await fetch("https://api.voyageai.com/v1/embeddings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({
+        input: [text],
+        model: process.env.VOYAGE_MODEL || "voyage-3-lite",
+        input_type: "query",
+      }),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    const vector = json?.data?.[0]?.embedding;
+    return Array.isArray(vector) ? vector : null;
   } catch {
-    /* fall through to JSON */
+    return null; // timeout, network error or a non-JSON body: fall back to full context
   }
-  return { mode: "full", chunks: JSON_CHUNKS };
 }
 
 /**
- * Return the most relevant chunks for a query.
- *  - DB + Voyage available  → real vector retrieval (cosine top-k via pgvector).
- *  - DB only                → full context from the DB.
- *  - neither                → full context from the bundled JSON (original behavior).
+ * The most relevant chunks for a query.
+ *  - DB + Voyage available and the table matches the bundle: top-k by cosine similarity.
+ *  - anything else: the whole bundled knowledge base.
  */
-export async function retrieve(query: string, k = 4): Promise<Retrieval> {
-  if (!sql) return { mode: "full", chunks: JSON_CHUNKS };
-  if (!process.env.VOYAGE_API_KEY) return fullContextFromDb();
-
+export async function retrieve(query: string, k = 5): Promise<Retrieval> {
+  if (!sql || !process.env.VOYAGE_API_KEY) return FULL;
   const qvec = await embedQuery(query);
-  if (!qvec) return fullContextFromDb();
+  if (!qvec) return FULL;
 
   try {
     const lit = `[${qvec.join(",")}]`;
-    const rows = await sql`
-      SELECT id, title, body AS text, 1 - (embedding <=> ${lit}::vector) AS score
-      FROM kb_chunks
-      WHERE embedding IS NOT NULL
-      ORDER BY embedding <=> ${lit}::vector
-      LIMIT ${k}`;
-    if (rows.length) return { mode: "rag", chunks: rows as Chunk[] };
-    return fullContextFromDb();
+    const rows = (await withTimeout(
+      sql`
+        SELECT id, title, body, 1 - (embedding <=> ${lit}::vector) AS score
+        FROM kb_chunks
+        WHERE embedding IS NOT NULL
+        ORDER BY embedding <=> ${lit}::vector
+        LIMIT ${k}`,
+      TIMEOUT_MS,
+    )) as { id: string; title: string; body: string; score: number | string }[];
+
+    const chunks: Chunk[] = [];
+    for (const row of rows) {
+      const bundled = BY_ID.get(row.id);
+      if (!bundled || bundled.title !== row.title || bundled.text !== row.body) return FULL;
+      chunks.push({ ...bundled, score: Number(row.score) });
+    }
+    return chunks.length ? { mode: "rag", chunks } : FULL;
   } catch {
-    return fullContextFromDb();
+    return FULL;
   }
 }
 

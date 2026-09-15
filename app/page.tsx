@@ -1,259 +1,243 @@
-import AgentGraph from "@/components/AgentGraph";
-import Chatbot from "@/components/Chatbot";
-import Reveal from "@/components/Motion";
+import type { Metadata } from "next";
+import Link from "next/link";
 import ContactForm from "@/components/ContactForm";
-import ViewCount from "@/components/ViewCount";
-import ThemeToggle from "@/components/ThemeToggle";
+import EvalLiveStatus from "@/components/EvalLiveStatus";
+import { Source } from "@/components/Source";
+import { CERTIFICATIONS, EDUCATION, ROLES, SKILLS, type Entry } from "@/content/experience";
+import { ALSO_BUILT, FEATURED, type LinkRef, type Project } from "@/content/projects";
+import { SITE } from "@/content/site";
+import { src } from "@/content/sources";
 
-// EDIT: your real links.
-const LINKS = {
-  email: "mailto:vineethkodakandla@gmail.com",
-  github: "https://github.com/vineethkodakandla",
-  linkedin: "https://www.linkedin.com/in/vineethkodakandla",
-  resume: "/resume.pdf", // drop resume.pdf into /public
-};
+export const metadata: Metadata = { alternates: { canonical: "/" } };
+
+function ProjectLink({ link }: { link: LinkRef }) {
+  return link.href.startsWith("/") ? <Link href={link.href}>{link.label}</Link> : <a href={link.href}>{link.label}</a>;
+}
+
+function WorkCard({ project }: { project: Project }) {
+  const titleId = `work-${project.slug}`;
+  return (
+    <article className="work-card" aria-labelledby={titleId}>
+      <div>
+        <p className="kicker">{project.kicker}</p>
+        <h3 id={titleId}>
+          {project.caseStudy ? <Link href={`/work/${project.slug}`}>{project.title}</Link> : project.title}
+        </h3>
+        {project.question ? <p className="question">{project.question}</p> : null}
+        <p className="summary">{project.summary}</p>
+        <ul className="chips" aria-label="Tools used">
+          {project.stack.map((s) => (
+            <li key={s}>{s}</li>
+          ))}
+        </ul>
+        <div className="link-row">
+          {project.links.map((l) => (
+            <ProjectLink key={l.href} link={l} />
+          ))}
+        </div>
+      </div>
+      <div className="figures">
+        {project.live ? <EvalLiveStatus /> : null}
+        {project.figures.map((f) => (
+          <div className="figure-stat" key={f.value}>
+            <div className="value">{f.value}</div>
+            <div className="label">{f.label}</div>
+            <Source source={f.source} />
+          </div>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function AlsoItem({ project }: { project: Project }) {
+  return (
+    <article className="also-item" aria-labelledby={`also-${project.slug}`}>
+      <p className="kicker">{project.kicker}</p>
+      <h4 id={`also-${project.slug}`}>{project.title}</h4>
+      <p>{project.summary}</p>
+      <ul className="chips" aria-label="Tools used">
+        {project.stack.map((s) => (
+          <li key={s}>{s}</li>
+        ))}
+      </ul>
+      <div className="link-row">
+        {project.links.map((l) => (
+          <ProjectLink key={l.href} link={l} />
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function TimelineItem({ entry }: { entry: Entry }) {
+  return (
+    <li>
+      <div className="when">{entry.dates}</div>
+      <div>
+        <h3>{entry.org}</h3>
+        <div className="where">{entry.place}</div>
+        <p>{entry.summary}</p>
+      </div>
+    </li>
+  );
+}
 
 export default function Home() {
   return (
     <>
-      {/* STATUS BAR */}
-      <div className="statusbar">
-        <div className="wrap row">
-          <span className="dot" />
-          <span className="name">VINEETH REDDY KODAKANDLA</span>
-          <span>AI/ML ENGINEER</span>
-          <span className="statthey">
-            <a href={LINKS.github} target="_blank" rel="noopener">GITHUB</a>
-            <a href={LINKS.linkedin} target="_blank" rel="noopener">LINKEDIN</a>
-            <a href={LINKS.email}>EMAIL</a>
-            <ThemeToggle />
-          </span>
+      <section className="hero container" aria-labelledby="hero-title">
+        <p className="kicker">{SITE.name}, ML engineer</p>
+        <h1 id="hero-title">Inference engineering, with the data attached.</h1>
+        <p className="lede">
+          I work on serving models: how fast and how cheaply they run on real hardware, and whether their output
+          holds up. Before my M.S. in Computer Science, I worked on LLM serving at EXL and on real-time vision
+          inference at L&amp;T Technology Services.
+        </p>
+        <p className="note">
+          The projects below are public. Every measured result on this site links to the committed file it came
+          from, and each write-up says what its measurement does not show.
+        </p>
+        <div className="actions">
+          <a className="button primary" href="#work">
+            See the work
+          </a>
+          <a className="button" href={`mailto:${SITE.email}`}>
+            Email me
+          </a>
+          <a className="button" href={SITE.github}>
+            GitHub
+          </a>
         </div>
-      </div>
+        <p className="availability">Open to ML engineer, inference and software engineering roles. Based in New Jersey.</p>
+      </section>
 
-      {/* HERO */}
-      <header className="hero">
-        <div className="wrap hero-grid">
-          <div>
-            <div className="h-availability">
-              <span className="dot" />
-              <span className="mono">Open to work · AI/ML · Forward Deployed · NY/NJ + Remote</span>
+      <section id="work" className="section" aria-labelledby="work-title">
+        <div className="container">
+          <div className="section-head">
+            <h2 id="work-title">Selected work</h2>
+            <p>Three measurement projects, each with a write-up of the setup, the findings and the limits.</p>
+          </div>
+          <div className="work-list">
+            {FEATURED.map((p) => (
+              <WorkCard key={p.slug} project={p} />
+            ))}
+          </div>
+
+          <div className="also-block">
+            <h3 className="subhead">Also built</h3>
+            <div className="also">
+              {ALSO_BUILT.map((p) => (
+                <AlsoItem key={p.slug} project={p} />
+              ))}
             </div>
-            <h1>AI that works<br /><span className="accent">after</span> the demo.</h1>
-            <p className="lede">
-              I build <strong>multi-agent platforms, RAG pipelines, and the MLOps plumbing</strong> that keeps them reliable once real users show up. MS in Computer Science. Targeting AI/ML, Applied AI, and Forward Deployed roles.
+          </div>
+        </div>
+      </section>
+
+      <section id="experience" className="section" aria-labelledby="experience-title">
+        <div className="container">
+          <div className="section-head">
+            <h2 id="experience-title">Experience</h2>
+            <p>Work at these companies is not public, so it is described here without figures.</p>
+          </div>
+          <ol className="timeline">
+            {ROLES.map((r) => (
+              <TimelineItem key={r.org} entry={r} />
+            ))}
+            <TimelineItem entry={EDUCATION} />
+          </ol>
+
+          <div className="skills-block">
+            <h3 className="subhead">Tools and methods</h3>
+            <div className="skills">
+              {SKILLS.map((g) => (
+                <div key={g.group}>
+                  <h4>{g.group}</h4>
+                  <ul>
+                    {g.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              <div>
+                <h4>Certification</h4>
+                <ul>
+                  {CERTIFICATIONS.map((c) => (
+                    <li key={c}>{c}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" className="section" aria-labelledby="about-title">
+        <div className="container">
+          <div className="section-head">
+            <h2 id="about-title">About</h2>
+          </div>
+          <div className="prose">
+            <p>
+              Most of my projects start from a claim that is easy to repeat and then check where it holds: that a
+              benchmark picks the right processor for a camera, that greedy decoding gives the same tokens when
+              requests are batched together, that a model can triage alerts without a person reading each one. The
+              answer is usually that it depends, and the useful part is finding out on what.
             </p>
-            <div className="cta-row">
-              <a className="btn btn-primary" href="#work">View selected work →</a>
-              <a className="btn btn-ghost" href="#contact">Get in touch</a>
+            <p>
+              I also try to publish what a result does not show, and to drop results that fail a check.
+              bitwise-forensics began as a simulator. When a check across 12 random seeds showed that the
+              simulated load trend changed with the seed, I kept the simulator only as a pipeline test and measured
+              a real engine instead.
+            </p>
+            <p>
+              <Source prefix="Seed check" source={src("bitwise", "analysis/output/sim_seeds.md")} />
+            </p>
+            <p>
+              I like small, inspectable builds as well, like the two browser demos above, and the assistant on this
+              site, which answers questions about my work from the same material you are reading.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" className="section" aria-labelledby="contact-title">
+        <div className="container contact-grid">
+          <div>
+            <h2 id="contact-title" style={{ fontSize: "clamp(1.8rem, 3.2vw, 2.4rem)" }}>
+              Contact
+            </h2>
+            <ul className="contact-lines">
+              <li>
+                <span className="label">Email</span> <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+              </li>
+              <li>
+                <span className="label">LinkedIn</span> <a href={SITE.linkedin}>in/vineethkodakandla</a>
+              </li>
+              <li>
+                <span className="label">GitHub</span> <a href={SITE.github}>vineethkodakandla</a>
+              </li>
+              <li>
+                <span className="label">Resume</span>{" "}
+                <a href={`mailto:${SITE.email}?subject=${encodeURIComponent("Resume request")}`}>On request by email</a>
+              </li>
+            </ul>
+            <div className="note-box">
+              <p>
+                <strong>Work authorization.</strong> I am on F-1 OPT and authorized to work in the US now. I will
+                need H-1B sponsorship to continue beyond OPT, and I would rather talk about that early. Roles that
+                require US citizenship or a security clearance are not a fit.
+              </p>
             </div>
           </div>
-          <div className="graph-card">
-            <AgentGraph />
-            <div className="graph-corner"><i className="on" /><i /><i className="on" /></div>
-            <div className="graph-tag"><b>edith</b> — multi-agent orchestration · live</div>
-          </div>
-        </div>
-      </header>
-
-      {/* TELEMETRY */}
-      <div className="telemetry">
-        <div className="wrap tel-grid">
-          <div className="tel"><div className="k">Education</div><div className="v">MS Computer Science<br /><span>Texas A&amp;M–Corpus Christi · 2026</span></div></div>
-          <div className="tel"><div className="k">Focus</div><div className="v">Agentic &amp; on-device AI<br /><span>RAG · quantization · MLOps</span></div></div>
-          <div className="tel"><div className="k">Core stack</div><div className="v">Python · TypeScript<br /><span>LangGraph · K8s · AWS</span></div></div>
-          <div className="tel"><div className="k">Based</div><div className="v">NYC metro area<br /><span>Open to remote</span></div></div>
-        </div>
-      </div>
-
-      {/* WORK */}
-      <section className="block" id="work">
-        <div className="wrap">
-          <Reveal><div className="sec-head"><span className="num">01</span><h2>Selected work</h2><span className="rule" /></div></Reveal>
-
-          <Reveal>
-            <article className="proj">
-              <div className="proj-top">
-                <div>
-                  <div className="domain">Agentic memory · LLMs</div>
-                  <h3>ANANTA</h3>
-                  <div className="tagline">An agent memory that forgets — on purpose.</div>
-                </div>
-                <span className="badge">Live · interactive</span>
-              </div>
-              <p>Most &quot;agent memory&quot; is a vector store that grows forever. ANANTA models memory the way people do: an <strong>Ebbinghaus forgetting curve</strong> decays each memory, <strong>recall reinforces it</strong> (spaced repetition), a decay pass prunes what has faded, and every write is <strong>SHA-256 hash-chained into a tamper-evident audit log</strong> you can try to break. On top sits <strong>confidence-banded model routing</strong> (memory → 8B → 70B → frontier) and a <strong>Reflexion agent loop</strong> — plan → recall → retrieve (RAG) → route → draft → self-check → abstain-or-answer. Runs entirely in your browser; bring a Groq key for real model answers.</p>
-              <div className="proj-links">
-                <a href="https://vineethkodakandla.github.io/ananta-lab/" target="_blank" rel="noopener">Live demo →</a>
-                <a href="https://github.com/vineethkodakandla/ananta-lab" target="_blank" rel="noopener">Source</a>
-              </div>
-              <div className="stack">
-                <span className="chip">JavaScript</span><span className="chip">Web Crypto</span><span className="chip">RAG</span>
-                <span className="chip">Model routing</span><span className="chip">Reflexion</span><span className="chip">Zero-dependency</span>
-              </div>
-            </article>
-          </Reveal>
-
-          <Reveal>
-            <article className="proj">
-              <div className="proj-top">
-                <div>
-                  <div className="domain">Multi-agent systems · LLMs</div>
-                  <h3>Edith</h3>
-                  <div className="tagline">A governed team of agents.</div>
-                  <ViewCount projectId="edith" />
-                </div>
-                <span className="badge">Live · interactive</span>
-              </div>
-              <p>Most multi-agent demos are just agents chatting. Edith is a <strong>governed team</strong>: an orchestrator dispatches specialists over a shared blackboard — <strong>Researcher (RAG) → Analyst → Critic (Reflexion) → Synthesizer</strong> — then a <strong>Governor policy gate</strong> blocks any recommendation that isn&apos;t grounded, hedged, and actionable, forcing a revision. It behaves honestly: on an off-corpus question it refuses to ship a confident guess and escalates for human review.</p>
-              <div className="proj-links">
-                <a href="https://vineethkodakandla.github.io/edith-lab/" target="_blank" rel="noopener">Live demo →</a>
-                <a href="https://github.com/vineethkodakandla/edith-lab" target="_blank" rel="noopener">Source</a>
-              </div>
-              <div className="stack">
-                <span className="chip">Multi-agent</span><span className="chip">Orchestration</span><span className="chip">Reflexion</span>
-                <span className="chip">Governance</span><span className="chip">RAG</span><span className="chip">Zero-dependency</span>
-              </div>
-            </article>
-          </Reveal>
-
-          <Reveal>
-            <article className="proj">
-              <div className="proj-top">
-                <div>
-                  <div className="domain">Edge inference · Performance engineering</div>
-                  <h3>Meteor Lake Latency Lab</h3>
-                  <div className="tagline">The fastest processor was the wrong one.</div>
-                  <ViewCount projectId="edge-vision" />
-                </div>
-                <span className="badge">Measured on-device</span>
-              </div>
-              <p>Most &quot;I ran it on the NPU&quot; write-ups report a median and stop. This one fixes a <strong>33.3 ms per-frame budget first</strong>, then measures real-time instance segmentation across <strong>all three processors that share one package power budget</strong> — NPU, Arc iGPU and CPU — over twelve configurations with <strong>INT8 post-training quantization</strong>. The finding is that <strong>the right device depends on duty cycle</strong>: saturated, the iGPU posts the best median and a 47 ms p99; on a real 30 fps webcam the same configuration runs a 13.3 ms p99 and wins outright. The tail turned out not to be inference at all — on the bad frames the model is fine and the <strong>CPU-side stages stall for 30–137 ms</strong>. Reporting only the benchmark would have shipped the wrong chip.</p>
-              <span className="metric"><b>measured:</b> 13.3 ms p99 over 2,398 live frames · INT8 costs 0.0024 box mAP on held-out COCO · postprocess verified 371/371 against the reference decoder</span>
-              <div className="proj-links">
-                <a href="https://vineethkodakandla.github.io/edge-vision-lab/" target="_blank" rel="noopener">Read the report →</a>
-                <a href="https://github.com/vineethkodakandla/edge-vision-lab" target="_blank" rel="noopener">Source</a>
-              </div>
-              <div className="stack">
-                <span className="chip">OpenVINO</span><span className="chip">NNCF</span><span className="chip">INT8 PTQ</span>
-                <span className="chip">NPU</span><span className="chip">Python</span><span className="chip">Benchmarking</span>
-              </div>
-            </article>
-          </Reveal>
-
-          <Reveal>
-            <article className="proj">
-              <div className="proj-top">
-                <div>
-                  <div className="domain">LLM serving · Reproducibility</div>
-                  <h3>bitwise-forensics</h3>
-                  <div className="tagline">Same prompt, greedy decoding: sharing engine steps can change the answer.</div>
-                  <ViewCount projectId="bitwise" />
-                </div>
-                <span className="badge">Measured · 40 prompts · 2 devices</span>
-              </div>
-              <p>This project measures how often greedy output changes when other requests share engine steps, and what changes it, on a <strong>real continuous-batching engine</strong>: OpenVINO GenAI serving Qwen2.5-Coder-0.5B (INT4 weights) on a Core Ultra 7 155H&apos;s Arc iGPU and CPU, with 40 short templated prompts about inference topics. By default, sharing changed the output (up to 128 tokens) in <strong>95.6–100% of iGPU runs and 54.4–72.5% of CPU runs</strong>. It is not randomness: <strong>replaying the eight arrival schedules at rate c8 (8 arrivals per max-length generation) with default options reproduced tokens, chosen-token logprobs and batch sizes for all 320 runs per device</strong>. On the CPU the main lever was <strong>dynamic activation quantization</strong>: turning it off cut token changes from 71% to 21% at c8, and adding an f32 KV cache took them to 0 of 320 at c8 and at c32, though logprobs still moved by up to 2.9e-5. No tested iGPU setting removed them.</p>
-              <span className="metric"><b>measured:</b> paired bootstrap CIs over prompts and trials · replay control and repeated batch-of-1 baselines · raw per-token results, report code and analysis scripts in the repo</span>
-              <div className="proj-links">
-                <a href="https://github.com/vineethkodakandla/bitwise-forensics#results" target="_blank" rel="noopener">Read the results →</a>
-                <a href="https://github.com/vineethkodakandla/bitwise-forensics" target="_blank" rel="noopener">Source</a>
-              </div>
-              <div className="stack">
-                <span className="chip">OpenVINO GenAI</span><span className="chip">Continuous batching</span><span className="chip">LLM inference</span>
-                <span className="chip">Python</span><span className="chip">Bootstrap statistics</span><span className="chip">GitHub Actions</span>
-              </div>
-            </article>
-          </Reveal>
-
-          <Reveal>
-            <article className="proj alert">
-              <div className="proj-top">
-                <div>
-                  <div className="domain">Network AIOps · Forward Deployed</div>
-                  <h3>PathwiseAI</h3>
-                  <div className="tagline">Catch the outage before it happens.</div>
-                  <ViewCount projectId="pathwise" />
-                </div>
-                <span className="badge flag">Most FDE-aligned</span>
-              </div>
-              <p>Network operators react to SLA violations after they hit and write policy in raw NETCONF. PathwiseAI <strong>predicts SLA violations early with an LSTM model</strong>, lets operators write policy in plain English, and runs every change through a <strong>digital-twin layer that validates it before it touches the live network</strong> — behind a React/TypeScript operator dashboard. Benchmarked against Cisco, VMware, and Fortinet. Built around a real operator&apos;s workflow, not just a model.</p>
-              <div className="stack">
-                <span className="chip">Python</span><span className="chip">LSTM</span><span className="chip">React</span>
-                <span className="chip">TypeScript</span><span className="chip">NETCONF</span><span className="chip">Digital twin</span>
-              </div>
-            </article>
-          </Reveal>
-
-          <Reveal>
-            <div className="proj-secondary">
-              <article className="proj">
-                <div className="proj-top"><div><div className="domain">Full-stack · CI/CD</div><h3>Pathfinders</h3><ViewCount projectId="pathfinders" /></div></div>
-                <p>CI/CD analytics platform: <strong>FastAPI</strong> backend, <strong>React</strong> frontend, Redis and TimescaleDB for time-series pipeline data, automated through GitHub Actions.</p>
-                <div className="stack"><span className="chip">FastAPI</span><span className="chip">React</span><span className="chip">Redis</span><span className="chip">TimescaleDB</span><span className="chip">GitHub Actions</span></div>
-              </article>
-              <article className="proj">
-                <div className="proj-top"><div><div className="domain">Research · Access control</div><h3>Rule-Based Multi-Agent Access</h3></div></div>
-                <p>Graduate research on an <strong>ABAC/XACML multi-agent system</strong> — a deterministic, rule-based counterpart to LLM agents for cooperative access-control decisions.</p>
-                <div className="stack"><span className="chip">ABAC</span><span className="chip">XACML</span><span className="chip">Multi-agent</span><span className="chip">Policy</span></div>
-              </article>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* CAPABILITIES */}
-      <section className="block">
-        <div className="wrap">
-          <Reveal><div className="sec-head"><span className="num">02</span><h2>Capabilities</h2><span className="rule" /></div></Reveal>
-          <Reveal>
-            <div className="caps">
-              <div className="cap"><h4>Agents &amp; LLMs</h4><ul><li>LangGraph</li><li>CrewAI</li><li>RAG</li><li>Mem0</li><li>LoRA / QLoRA</li><li>Eval &amp; prompting</li></ul></div>
-              <div className="cap"><h4>Inference &amp; Edge</h4><ul><li>OpenVINO</li><li>NNCF · INT8 PTQ</li><li>NPU · iGPU targeting</li><li>Latency &amp; jitter profiling</li><li>LLM serving · reproducibility measurement</li><li>OpenCV</li></ul></div>
-              <div className="cap"><h4>MLOps &amp; Infra</h4><ul><li>Docker</li><li>Kubernetes</li><li>AWS</li><li>FastAPI</li><li>GitHub Actions</li></ul></div>
-              <div className="cap"><h4>Languages &amp; Data</h4><ul><li>Python</li><li>TypeScript</li><li>SQL</li><li>React</li><li>PostgreSQL</li><li>TimescaleDB · Redis</li></ul></div>
-              <div className="cap now"><h4>Currently</h4><ul><li>AWS Machine Learning – Specialty (in progress)</li></ul></div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ABOUT */}
-      <section className="block about">
-        <div className="wrap">
-          <Reveal><div className="sec-head"><span className="num">03</span><h2>About</h2><span className="rule" /></div></Reveal>
-          <Reveal>
-            <p>I build AI systems that make it out of the notebook and into production. Most of my work centers on <strong>agentic systems</strong> — giving LLMs memory, tools, and enough structure to act dependably instead of just impressively in a demo.</p>
-            <p>My research background is in <strong>rule-based, deterministic multi-agent systems</strong>, which gives me a useful instinct for where probabilistic LLM agents need guardrails — when to trust the model and when to constrain it. I care most about the seam where a model meets a real user and has to keep working.</p>
-            <p className="sig">// MS Computer Science, Texas A&amp;M–Corpus Christi · open to AI/ML, Applied AI &amp; Forward Deployed Engineer roles</p>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* CONTACT */}
-      <section className="contact" id="contact">
-        <div className="wrap">
-          <Reveal>
-            <span className="eyebrow">// let&apos;s build something that ships</span>
-            <h2>Get in touch.</h2>
-            <p>If you&apos;re building something where models have to work in front of real users, I&apos;d like to talk.</p>
+          <div>
+            <h3 className="subhead">Send a message</h3>
             <ContactForm />
-            <div className="cta-row">
-              <a className="btn btn-primary" href={LINKS.email}>Email me →</a>
-              <a className="btn btn-ghost" href={LINKS.linkedin} target="_blank" rel="noopener">LinkedIn</a>
-              <a className="btn btn-ghost" href={LINKS.github} target="_blank" rel="noopener">GitHub</a>
-              <a className="btn btn-ghost" href={LINKS.resume} target="_blank" rel="noopener">Résumé (PDF)</a>
-            </div>
-          </Reveal>
+          </div>
         </div>
       </section>
-
-      <footer>
-        <div className="wrap row">
-          <span>© 2026 Vineeth Reddy Kodakandla</span>
-          <span>Next.js · RAG chatbot · powered by Claude</span>
-        </div>
-      </footer>
-
-      <Chatbot />
     </>
   );
 }

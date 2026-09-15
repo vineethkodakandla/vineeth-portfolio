@@ -3,10 +3,14 @@ import { sql } from "@/lib/db";
 import { contactLimiter, checkLimit } from "@/lib/ratelimit";
 import { contactBodySchema } from "@/lib/validation";
 import { sendContactEmail } from "@/lib/email";
+import { crossSiteRejection } from "@/lib/same-origin";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  const rejected = crossSiteRejection(req);
+  if (rejected) return rejected;
+
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
   const allowed = await checkLimit(contactLimiter, ip, 5, "contact");

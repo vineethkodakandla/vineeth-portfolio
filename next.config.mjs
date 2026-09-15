@@ -1,4 +1,10 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { withSentryConfig } from "@sentry/nextjs";
+
+// Pin the project root. Without it Next walks up to a stray lockfile in the
+// home directory on the dev machine and warns about the workspace root.
+const root = path.dirname(fileURLToPath(import.meta.url));
 
 // CSP shipped report-only first so it can't break the app; tighten + enforce
 // once violation reports are clean. 'unsafe-inline' is needed for Next's inline
@@ -28,6 +34,8 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  turbopack: { root },
+  outputFileTracingRoot: root,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

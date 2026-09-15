@@ -1,6 +1,5 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
 export default function GlobalError({
@@ -10,7 +9,11 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    // Loaded on demand so the Sentry SDK is not part of every page's bundle.
+    if (!process.env.NEXT_PUBLIC_SENTRY_DSN) return;
+    import("@sentry/nextjs")
+      .then((Sentry) => Sentry.captureException(error))
+      .catch(() => {});
   }, [error]);
 
   return (
@@ -21,15 +24,15 @@ export default function GlobalError({
           minHeight: "100vh",
           display: "grid",
           placeItems: "center",
-          background: "#0B0F17",
-          color: "#EAF0F7",
+          background: "#fafaf7",
+          color: "#16181d",
           fontFamily: "system-ui, sans-serif",
         }}
       >
         <div style={{ textAlign: "center", padding: 24 }}>
           <h1 style={{ fontSize: 22, margin: "0 0 8px" }}>Something went wrong.</h1>
-          <p style={{ color: "#9AA8B9", margin: 0 }}>
-            Please refresh the page. If it keeps happening, try again later.
+          <p style={{ color: "#474c55", margin: 0 }}>
+            Please refresh the page. If it keeps happening, email vineethkodakandla@gmail.com.
           </p>
         </div>
       </body>

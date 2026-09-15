@@ -8,7 +8,8 @@ export const chatBodySchema = z.object({
     .array(
       z.object({
         role: z.enum(["user", "assistant"]),
-        content: z.string().min(1).max(8000),
+        // Matches the client's per-turn limit; input size drives the model cost.
+        content: z.string().min(1).max(2000),
       })
     )
     .min(1)

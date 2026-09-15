@@ -1,22 +1,19 @@
 "use client";
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 type Theme = "dark" | "light";
 type Ctx = { theme: Theme; toggle: () => void; set: (t: Theme) => void };
 
-const ThemeCtx = createContext<Ctx>({
-  theme: "dark",
-  toggle: () => {},
-  set: () => {},
-});
+const ThemeCtx = createContext<Ctx>({ theme: "light", toggle: () => {}, set: () => {} });
+
+const THEME_COLOR: Record<Theme, string> = { light: "#fafaf7", dark: "#0e0f11" };
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // Initial state matches the no-flash <head> script's value on mount.
-  const [theme, setThemeState] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>("light");
 
+  // The pre-paint script in layout.tsx has already stamped <html data-theme>.
   useEffect(() => {
-    const current = (document.documentElement.dataset.theme as Theme) || "dark";
-    setThemeState(current);
+    setThemeState(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
   }, []);
 
   const apply = (t: Theme) => {
@@ -27,15 +24,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } catch {
       /* storage may be blocked */
     }
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", t === "light" ? "#F4F1EA" : "#0B0F17");
+    document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute("content", THEME_COLOR[t]));
   };
 
   return (
     <ThemeCtx.Provider
       value={{
         theme,
-        toggle: () => apply(theme === "dark" ? "light" : "dark"),
+        toggle: () => apply(document.documentElement.dataset.theme === "dark" ? "light" : "dark"),
         set: apply,
       }}
     >

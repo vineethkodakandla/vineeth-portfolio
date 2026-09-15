@@ -12,3 +12,7 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# local build logs
+build.log
+build-sentry.log

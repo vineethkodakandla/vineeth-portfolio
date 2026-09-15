@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { Resend } from "resend";
 
 // Null when RESEND_API_KEY is absent → contact submissions are still persisted,
@@ -46,8 +47,17 @@ export async function sendContactEmail(input: {
         <p style="white-space:pre-wrap;margin:0;color:#333">${escapeHtml(input.message)}</p>
       </div>`,
     });
-    return !error;
-  } catch {
+    if (error) {
+      // Logged as well as reported: Sentry sends nothing without a DSN, and the
+      // visitor's details stay out of both.
+      console.error("[contact] Resend send failed:", error.name, error.message);
+      Sentry.captureException(new Error(`Resend send failed: ${error.name}: ${error.message}`));
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("[contact] Resend threw:", e instanceof Error ? e.message : e);
+    Sentry.captureException(e);
     return false;
   }
 }

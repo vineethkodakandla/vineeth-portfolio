@@ -1,91 +1,92 @@
-# Vineeth Reddy Kodakandla — Portfolio + RAG Chatbot
+# Vineeth Reddy Kodakandla: portfolio
 
-A production-grade Next.js 14 portfolio with a real **vector-RAG chatbot**, a
-**data-driven** backend (Postgres + Redis), and **production hardening**
-(durable rate limiting, validation, error monitoring, security headers, SEO).
-Every external service is feature-detected — the app builds and runs even when a
-key is missing, degrading gracefully.
+Next.js 16 site for an ML engineer's public work, with a retrieval-augmented assistant.
+
+The content follows one rule: every measured result links to the committed file it came from, pinned to a
+commit SHA, and every write-up states what its measurement does not show. Scripts in `scripts/` enforce what
+can be enforced mechanically.
 
 ```
 app/
-  page.tsx          the site (server component + client islands)
-  layout.tsx        fonts, metadata, theme no-flash script, providers
-  globals.css       dark/light theming via CSS variables
-  api/
-    chat/           RAG chatbot — retrieves context, streams Claude + sources
-    contact/        validated, rate-limited; persists + emails
-    track/ counts/  page-view + project-view analytics
-    health/ metrics/ ops endpoints (metrics is token-guarded)
-  opengraph-image · twitter-image · sitemap · robots   (SEO)
-components/         AgentGraph, Chatbot, ContactForm, CommandPalette (⌘K),
-                   ThemeToggle, ViewCount, Analytics, Motion, providers
-lib/
-  db.ts             Neon serverless Postgres client (null-safe)
-  rag.ts            pgvector cosine top-k retrieval (+ JSON fallback)
-  ratelimit.ts      Upstash sliding-window (+ in-memory fallback)
-  validation.ts     zod request schemas
-  analytics.ts · email.ts · cache helpers
-scripts/
-  migrate.mjs       creates pgvector extension + tables + HNSW index
-  embed.mjs         embeds data/knowledge.json into pgvector
-data/knowledge.json the chatbot's knowledge base (edit this)
+  page.tsx                 home: hero, selected work, experience, about, contact
+  work/[slug]/page.tsx     case studies, statically generated from content/case-studies
+  api/chat                 assistant: Voyage embeddings, pgvector retrieval, Claude
+  api/contact              validated, rate-limited contact form (Postgres + Resend)
+  api/track, counts,       page-view analytics and ops endpoints (metrics is token-guarded)
+      health, metrics
+  opengraph-image, twitter-image, sitemap, robots
+components/
+  charts/RowChart.tsx      HTML/CSS row charts: dumbbells, dot-and-interval rows, bars with whiskers
+  charts/ChartFigure.tsx   figure wrapper: caption, table view of the same data, source line
+  ChartTooltips.tsx        one tooltip for every chart; renders text only
+  EvalLiveStatus.tsx       live panel over llm-eval-observatory's results (hourly ISR)
+  Chatbot, ContactForm, CommandPalette (Ctrl/Cmd+K), SiteHeader, SiteFooter, Theme*
+content/
+  site.ts                  identity and navigation
+  sources.ts               pinned repositories and the src()/blob() link helpers
+  projects.ts              project cards
+  experience.ts            employment and education (read the note at the top before editing)
+  case-studies/*.tsx       case-study bodies, with their chart data inline
+data/knowledge.json        the assistant's knowledge base; must describe the same things as the pages
+lib/                       db, rag, ratelimit, validation, eval-live, analytics, email
+scripts/                   migrate, embed, check-content, check-links
 ```
 
 ## Run locally
 
 ```bash
-npm install
-cp .env.example .env.local      # add ANTHROPIC_API_KEY at minimum
-npm run dev                     # http://localhost:3000
+npm ci
+npm run dev
 ```
 
-With only `ANTHROPIC_API_KEY`, the chatbot answers in **full-context mode** and
-the rest of the site works; analytics/persistence no-op until a DB is added.
+The site builds and runs with no environment variables. The assistant renders only when `ANTHROPIC_API_KEY`
+is set; see `.env.example` for everything else and what happens when each value is missing.
 
-## Turn on real vector RAG + dynamic features
+## Before pushing
 
-1. Create a **Neon** Postgres DB → put the pooled connection string in
-   `DATABASE_URL`. Add a free **Voyage** key (`VOYAGE_API_KEY`).
-2. `npm run db:migrate`   — enables pgvector, creates the schema.
-3. `npm run embed`        — embeds the knowledge base into pgvector.
-   (Re-run `embed` whenever you edit `data/knowledge.json`.)
-4. Restart. The chatbot now retrieves the top-k relevant chunks per question and
-   shows its **sources**; the contact form persists to Postgres; analytics record.
+```bash
+npm run typecheck
+npm run check          # wording rules, knowledge-base coverage, pinned sources
+npm run build
+npm run check:links    # fetches every external link in the prerendered pages
+```
 
-Optional services (each degrades gracefully if absent):
+## Content rules
 
-| Service | Var(s) | Enables |
+- **Numbers.** Cite with `src(repoKey, path, [startLine, endLine])` from `content/sources.ts`, which pins the
+  link to the repository's commit. Change a SHA there only after re-checking every number that cites it.
+- **Employment.** `content/experience.ts` is a strict subset of the resume: company, place, dates and a
+  qualitative description. No titles, seniority verbs or internal figures. `npm run check` rejects the phrases
+  the fact-checked record rules out.
+- **Knowledge base.** Update `data/knowledge.json` in the same change as the page, then run `npm run embed`.
+  Production answers from the `kb_chunks` table, not the JSON file, and `embed` both upserts the chunks and
+  deletes rows whose ids are no longer in the file. A chunk id must have an entry in `SOURCE_LINKS` in
+  `components/Chatbot.tsx`.
+- **Charts.** Series colours are slots 1 to 3 of a validated palette (checked for colour-vision deficiency and
+  contrast against both theme surfaces). Every chart ships its numbers as a table and names its data file.
+
+## Services
+
+Every service is feature-detected; a missing key disables that feature and nothing else.
+
+| Service | Variables | Enables |
 |---|---|---|
-| Upstash Redis | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | durable rate limiting, caching, view counters |
-| Resend | `RESEND_API_KEY`, `CONTACT_*_EMAIL` | contact-form email delivery |
-| Sentry | `NEXT_PUBLIC_SENTRY_DSN` (+ `SENTRY_*`) | error monitoring |
-| Metrics | `METRICS_TOKEN` | `/api/metrics` access |
+| Anthropic | `ANTHROPIC_API_KEY`, `CHAT_MODEL` (default `claude-opus-5`) | the assistant |
+| Neon Postgres + pgvector | `DATABASE_URL` | retrieval, contact persistence, analytics |
+| Voyage | `VOYAGE_API_KEY`, `VOYAGE_MODEL` | query and document embeddings |
+| Upstash Redis | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | durable rate limiting and counters |
+| Resend | `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL` | contact-form email |
+| Sentry | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | error monitoring |
+| Site URL | `NEXT_PUBLIC_SITE_URL` | canonical, sitemap and Open Graph URLs |
+| Metrics | `METRICS_TOKEN` | `GET /api/metrics` |
 
-See `.env.example` for the full list and behavior-when-missing.
+With `claude-opus-5` (or a Fable model) the chat route sends low effort and server-side refusal fallbacks;
+if `CHAT_MODEL` names an older model those parameters are left off.
 
-## Deploy (Vercel)
+## Deploy
 
-1. Push to GitHub, import at https://vercel.com/new.
-2. Add the env vars from `.env.example` in Project Settings (Production + Preview).
-   Set `NEXT_PUBLIC_SITE_URL` to your deployed URL (for SEO/OG/canonical).
-3. Run the one-off setup against the production DB (locally with prod
-   `DATABASE_URL`, or via the Vercel CLI):
-   ```bash
-   npm run db:migrate && npm run embed
-   ```
-   These are kept out of `build` so a deploy never fails on a DB hiccup.
-4. Deploy.
+Vercel builds `main` to production. Other branches get preview deployments, which have no environment
+variables, so the assistant is hidden there and the contact form reports that it could not send.
 
-## Ops
-
-- `GET /api/health` — dependency probe (`{ db, redis, anthropic, … }`).
-- `GET /api/metrics` — aggregates; requires `Authorization: Bearer $METRICS_TOKEN`.
-
-## Notes
-
-- Default chat model is Haiku (`CHAT_MODEL` to override, e.g. `claude-sonnet-4-6`).
-- Security headers (incl. CSP, currently report-only) are set in `next.config.mjs`.
-- Fonts use `next/font/google` (self-hosted at build by Next). The OpenGraph image
-  uses `@vercel/og` and renders on Vercel; it may not render under a local Windows
-  `next start` due to a WASM limitation.
-```
+After changing `data/knowledge.json`, run `npm run db:migrate` once if the schema is new, then `npm run embed`
+with the production `DATABASE_URL` and `VOYAGE_API_KEY` in `.env.local`.

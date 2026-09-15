@@ -1,13 +1,26 @@
-import * as Sentry from "@sentry/nextjs";
+// Sentry's browser SDK is loaded only when a DSN is configured, so deployments
+// without Sentry do not ship it in every page's JavaScript.
 
-// DSN-guarded browser init. No DSN => no-op (and no network calls from clients).
-if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
-  Sentry.init({
-    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-    tracesSampleRate: 0.1,
-    replaysSessionSampleRate: 0,
-    replaysOnErrorSampleRate: 0,
-  });
+type NavigationType = "push" | "replace" | "traverse";
+let transitionHook: ((href: string, navigationType: NavigationType) => void) | undefined;
+
+const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+if (dsn) {
+  import("@sentry/nextjs")
+    .then((Sentry) => {
+      Sentry.init({
+        dsn,
+        tracesSampleRate: 0.1,
+        replaysSessionSampleRate: 0,
+        replaysOnErrorSampleRate: 0,
+      });
+      transitionHook = Sentry.captureRouterTransitionStart;
+    })
+    .catch(() => {
+      /* monitoring is optional */
+    });
 }
 
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+export function onRouterTransitionStart(href: string, navigationType: NavigationType) {
+  transitionHook?.(href, navigationType);
+}
