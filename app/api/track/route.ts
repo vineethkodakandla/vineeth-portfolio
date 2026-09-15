@@ -22,11 +22,12 @@ export async function POST(req: Request) {
   if (!parsed.success) return new Response(null, { status: 204 });
 
   const country = req.headers.get("x-vercel-ip-country");
-  const referrer = req.headers.get("referer");
 
   try {
     if (parsed.data.type === "pageview") {
-      await recordPageView(parsed.data.path || "/", referrer, country);
+      // No referrer: the beacon is same-origin, so the Referer header is the
+      // visitor's own page URL, including any per-click tracking parameters.
+      await recordPageView(parsed.data.path || "/", null, country);
     } else if (parsed.data.type === "project" && parsed.data.id) {
       await incrProjectView(parsed.data.id);
     }

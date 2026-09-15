@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   // the user agent is stored with the message.
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-  const allowed = await checkLimit(contactLimiter, ip, 5, "contact");
+  const allowed = await checkLimit(contactLimiter, ip, 5, "contact", 3_600_000);
   if (!allowed) {
     return Response.json({ ok: false, error: "rate_limited" }, { status: 429 });
   }

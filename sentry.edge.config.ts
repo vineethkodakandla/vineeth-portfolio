@@ -6,5 +6,7 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
     dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
     tracesSampleRate: 0.1,
     enabled: true,
+    // No request headers (user agent, Vercel geolocation) or cookies on events.
+    integrations: [Sentry.requestDataIntegration({ include: { headers: false, cookies: false } })],
   });
 }
