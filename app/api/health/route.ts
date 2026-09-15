@@ -11,6 +11,7 @@ export async function GET() {
     voyage: !!process.env.VOYAGE_API_KEY,
     resend: !!process.env.RESEND_API_KEY,
     sentry: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
+    rateLimitSecret: !!process.env.RATE_LIMIT_SECRET,
     db: false,
     redis: false,
   };
