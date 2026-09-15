@@ -2,7 +2,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 // CSP shipped report-only first so it can't break the app; tighten + enforce
 // once violation reports are clean. 'unsafe-inline' is needed for Next's inline
-// hydration/runtime and framer-motion's injected styles (no untrusted HTML is
+// hydration/runtime and the no-flash theme script (no untrusted HTML is
 // rendered, so this is acceptable here).
 const csp = [
   "default-src 'self'",
@@ -28,7 +28,6 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  experimental: { instrumentationHook: true },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
@@ -42,5 +41,6 @@ export default process.env.NEXT_PUBLIC_SENTRY_DSN
       silent: true,
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
     })
   : nextConfig;
