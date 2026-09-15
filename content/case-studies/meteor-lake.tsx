@@ -25,7 +25,7 @@ const regimeRows: ChartRow[] = REGIMES.map((r) => ({
     { type: "dot", value: r.flat, hollow: true },
     { type: "dot", value: r.live },
   ],
-  value: `${r.flat.toFixed(1)} to ${r.live.toFixed(1)} ms`,
+  value: `${r.flat.toFixed(1)} / ${r.live.toFixed(1)} ms`,
   tip: [`Flat-out benchmark: ${r.flat.toFixed(2)} ms`, `Live webcam loop: ${r.live.toFixed(2)} ms`],
 }));
 
@@ -48,7 +48,9 @@ const stallRows: ChartRow[] = STALLS.map((s) => ({
     { type: "dot", value: s.p99, hollow: true },
     { type: "dot", value: s.excl },
   ],
-  value: `${s.p99.toFixed(1)} to ${s.excl.toFixed(1)} ms`,
+  // Two decimals, as stall_analysis.json stores them; rounding those again to one
+  // decimal can land on the wrong side of the underlying value.
+  value: `${s.p99.toFixed(2)} / ${s.excl.toFixed(2)} ms`,
   tip: [
     `p99, all frames: ${s.p99.toFixed(2)} ms`,
     `p99 without stall frames: ${s.excl.toFixed(2)} ms`,
@@ -83,19 +85,20 @@ function Body() {
         <ul>
           <li>
             On a live webcam loop, INT8 on the Arc iGPU ran a <strong>10.4 ms median and 13.3 ms p99</strong>, ahead of
-            the NPU at 18.0 and 22.3 ms. It missed the 33.3 ms budget slightly more often: 0.33% of frames against 0.05%.
+            the NPU at 18.0 and 22.3 ms. It missed the 33.3 ms budget more often: 8 of 2,398 frames (0.33%) against 1 of
+            1,891 (0.05%).
           </li>
           <li>
             In a flat-out benchmark the tails reversed: the iGPU&apos;s p99 was <strong>47.0 ms</strong> and the NPU&apos;s
-            18.0 ms. Which processor looks right depends on how busy the accelerator is kept.
+            18.0 ms. Which one has the better tail depends on how busy the accelerator is kept.
           </li>
           <li>
             The iGPU&apos;s flat-out tail came from CPU-side stalls, not the model. Without the stall frames its INT8 p99
             is 17.1 ms, and inference alone was 9.5 ms at p99.
           </li>
           <li>
-            Keeping the detection-head decode in float held the INT8 accuracy loss to 0.0015 box mAP. Quantizing it too
-            cost 0.0389.
+            Keeping the detection-head decode in float held the INT8 accuracy loss on the CPU to 0.0015 box mAP.
+            Quantizing it too cost 0.0389.
           </li>
         </ul>
       </section>
@@ -115,13 +118,8 @@ function Body() {
         </p>
         <p>
           In the benchmark, every configuration discarded 100 warm-up frames and then timed 1,000 frames one at a time,
-          with a 45 s cooldown between runs. End-to-end latency means preprocess, inference and NumPy postprocess;
-          capture and drawing are not timed.
-        </p>
-        <p>
-          For the live loop, INT8 on the iGPU and on the NPU ran against a real webcam for one 60 s session each. The
-          loop does not wait for a new camera frame, so the iGPU processed about 40 frames a second: busier than a
-          strict 30 fps camera, and far from flat-out.
+          with a 45 s cooldown between runs. End-to-end latency means preprocess, inference and the host-side
+          postprocess (NumPy decode with OpenCV NMS); capture and drawing are not timed.
         </p>
         <p>
           <Source
@@ -135,14 +133,29 @@ function Body() {
             ]}
           />
         </p>
+        <p>
+          For the live loop, INT8 on the iGPU and on the NPU ran against a real webcam for one 60 s session each. The
+          loop does not wait for a new camera frame, so the iGPU processed 2,398 frames in its session, about 40 a
+          second: busier than a strict 30 fps camera, and far from flat-out.
+        </p>
+        <p>
+          <Source
+            prefix="Live loop"
+            source={[
+              src("edge", "src/live_demo.py", [164, 172]),
+              src("edge", "results/live_results.json", [42, 51]),
+              src("edge", "README.md", [181, 181]),
+            ]}
+          />
+        </p>
 
         <h2>Findings</h2>
-        <h3>The benchmark and the camera ranked the processors differently</h3>
+        <h3>The benchmark and the camera reversed the p99 order</h3>
       </div>
 
       <ChartFigure
         title="Latency of INT8 on the iGPU and NPU, flat-out against live"
-        description="Hollow dots are the flat-out benchmark (1,000 frames each); filled dots are the live webcam loop (2,398 iGPU frames, 1,891 NPU frames). The vertical line is the 33.3 ms frame budget."
+        description="Hollow dots are the flat-out benchmark (1,000 frames each); filled dots are the live webcam loop (2,398 iGPU frames, 1,891 NPU frames). The readout gives flat-out / live. The vertical line is the 33.3 ms frame budget."
         table={{
           rowHeaders: 2,
           columns: [
@@ -177,10 +190,11 @@ function Body() {
 
       <div className="prose">
         <p>
-          Flat-out, the iGPU had the best median but the worst tail of the two, and the NPU looked like the safe
+          Flat-out, the iGPU had the better median but the worse tail of the two, and the NPU looked like the safe
           real-time choice. On the camera loop, where the iGPU spends much of each frame interval idle, its tail
-          collapsed and it beat the NPU on both median and p99. The NPU got slower live, not faster. A study that
-          reported only the benchmark would have described headroom, not this workload.
+          collapsed and it beat the NPU on both median and p99, although the NPU still missed the budget less often.
+          The NPU got slower live, not faster. A study that reported only the benchmark would have described headroom,
+          not this workload.
         </p>
 
         <h3>The iGPU tail was CPU-side stalls, not inference</h3>
@@ -188,7 +202,7 @@ function Body() {
 
       <ChartFigure
         title="p99 latency with and without stall frames, flat-out benchmark"
-        description="A stall is a frame whose CPU-side stages (preprocess plus postprocess) took more than 20 ms. Hollow dots include every frame; filled dots leave the stall frames out."
+        description="A stall is a frame whose CPU-side stages (preprocess plus postprocess) took more than 20 ms. Hollow dots include every frame; filled dots leave the stall frames out. The readout gives all frames / without stalls."
         table={{
           columns: [
             { label: "Configuration" },
@@ -270,12 +284,20 @@ function Body() {
       <div className="prose">
         <p>
           With the detection-head decode kept in float, INT8 cost 0.0015 box mAP on the CPU. Quantizing that decode as
-          well cost 0.0389, about 26 times as much, and on the NPU the fully quantized build&apos;s median was only
-          0.35 ms faster (13.58 against 13.93 ms). The same INT8 weights scored within 0.0009 of each other on the
-          CPU, iGPU and NPU.
+          well cost 0.0389, about 26 times as much. What that bought in speed depended on the processor. On the NPU the
+          fully quantized build&apos;s median was only 0.35 ms faster (13.58 against 13.93 ms). On the iGPU its median
+          was 1.33 ms faster, but its flat-out p99 was worse (49.00 against 47.02 ms). On the CPU it cut the frames over
+          budget from 46.3% to 4.8%. The same INT8 weights scored within 0.0009 of each other on the CPU, iGPU and NPU.
         </p>
         <p>
-          <Source prefix="Medians" source={src("edge", "results/summary_main.json", [242, 273])} />
+          <Source
+            prefix="Latency by build"
+            source={[
+              src("edge", "results/summary_main.json", [50, 97]),
+              src("edge", "results/summary_main.json", [146, 193]),
+              src("edge", "results/summary_main.json", [242, 289]),
+            ]}
+          />
         </p>
 
         <h2>What this does not show</h2>
@@ -287,17 +309,25 @@ function Body() {
             Only the two INT8 configurations were run live, for one 60 s session each, in one lighting condition with
             one person in frame. A busier scene changes postprocess cost.
           </li>
+        </ul>
+        <p>
+          <Source prefix="Limits stated in the repository" source={src("edge", "README.md", [166, 184])} />
+        </p>
+        <ul className="limits">
           <li>
             The live loop does not wait for new camera frames, so its duty cycle sits between a 30 fps camera and
             flat-out rather than matching either.
           </li>
           <li>
-            The repository includes a script that checks the NumPy postprocess against the reference decoder, but its
-            output is not committed, so no result from it is quoted here.
+            The repository includes a script that checks the hand-written postprocess against the Ultralytics decoder,
+            but its output is not committed, so no result from it is quoted here.
           </li>
         </ul>
         <p>
-          <Source prefix="Limits as stated in the repository" source={src("edge", "README.md", [166, 184])} />
+          <Source
+            prefix="Added for this write-up"
+            source={[src("edge", "src/live_demo.py"), src("edge", "src/verify_postprocess.py")]}
+          />
         </p>
       </div>
     </>
@@ -309,7 +339,7 @@ const meteorLake: CaseStudy = {
   title: "Meteor Lake Latency Lab",
   kicker: "Edge inference / latency",
   deck:
-    "Which processor on one laptop chip should run live instance segmentation inside a 33.3 ms frame budget? A flat-out benchmark and a live camera loop gave different answers.",
+    "Which processor on one laptop chip should run live instance segmentation inside a 33.3 ms frame budget? Flat-out, the Arc iGPU had the worse p99 of the two accelerators; on a live camera loop it had the better one.",
   description:
     "YOLOv8n-seg on the NPU, Arc iGPU and CPU of an Intel Core Ultra 7 155H with OpenVINO and NNCF INT8: latency tails, CPU-side stalls and what quantization cost.",
   meta: ["August 2026", "Python, OpenVINO 2026.3, NNCF", "12 benchmark configurations and 2 live runs"],

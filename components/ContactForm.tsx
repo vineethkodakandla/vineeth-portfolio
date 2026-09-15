@@ -174,6 +174,7 @@ export default function ContactForm() {
       <button className="button primary" type="submit" disabled={status === "sending"}>
         {status === "sending" ? "Sending" : "Send message"}
       </button>
+      <p className="cf-note">Messages are stored with the sender&apos;s IP address and browser user agent, to limit abuse.</p>
     </form>
   );
 }

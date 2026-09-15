@@ -4,6 +4,13 @@ import { EVAL_FILES, getEvalSnapshot, type EvalSnapshot } from "@/lib/eval-live"
 
 const pct = (v: number | null) => (v == null ? "n/a" : `${Math.round(v * 1000) / 10}%`);
 
+// The live files move every night, so their links say so rather than implying a
+// pinned commit like the rest of the site's sources.
+const LIVE_SOURCES = [
+  { label: "latest.json", href: EVAL_FILES.latest },
+  { label: "history.jsonl", href: EVAL_FILES.history },
+];
+
 function Unavailable() {
   return (
     <div className="live-status">
@@ -35,22 +42,16 @@ export default async function EvalLiveStatus() {
         {snap.completed} of {snap.configured} models
       </div>
       <div className="label">
-        completed that run.
-        {snap.nightsWithData != null ? ` ${snap.nightsWithData} of the 30 nights up to it produced results.` : ""}{" "}
-        Models that are unavailable or rate-limited on Groq&apos;s free tier are skipped for the night.
+        returned results in that run, and {snap.allTracks} finished all of their tracks.
+        {snap.nightsWithData != null ? ` ${snap.nightsWithData} of the 30 nights up to it produced results.` : ""} A
+        model that Groq&apos;s free tier rejects or keeps rate-limiting is dropped for the rest of the run.
       </div>
-      <Source
-        prefix="Live data"
-        source={[
-          { label: "latest.json", href: EVAL_FILES.latest },
-          { label: "history.jsonl", href: EVAL_FILES.history },
-        ]}
-      />
+      <Source prefix="Live data, updated nightly" source={LIVE_SOURCES} />
     </div>
   );
 }
 
-// Full version for the case study: one row per model that finished.
+// Full version for the case study: one row per model that returned results.
 export async function EvalLivePanel() {
   const snap = await getEvalSnapshot();
   if (!snap) {
@@ -66,14 +67,13 @@ export async function EvalLivePanel() {
         {statusLine(snap)}, {snap.timeLabel} UTC
       </span>
       <h2 id="live-panel-title">
-        {snap.completed} of {snap.configured} configured models completed this run
+        {snap.completed} of {snap.configured} configured models returned results in this run
       </h2>
       <p>
-        {snap.nightsWithData != null
-          ? `${snap.nightsWithData} of the 30 nights up to this run produced results. `
-          : ""}
-        This panel reads the committed results file and refreshes at most hourly, so it changes without a
-        redeploy.
+        {snap.allTracks} finished all of their tracks.{" "}
+        {snap.nightsWithData != null ? `${snap.nightsWithData} of the 30 nights up to this run produced results. ` : ""}
+        This panel reads the results file on the project&apos;s main branch, which is updated nightly, and refreshes at
+        most hourly.
       </p>
       <div className="table-scroll">
         <DataTable
@@ -82,7 +82,7 @@ export async function EvalLivePanel() {
               { label: "Model" },
               { label: "AML decisions correct", numeric: true },
               { label: "95% CI", numeric: true },
-              { label: "False clears", numeric: true },
+              { label: "Escalate cases wrongly cleared", numeric: true },
               { label: "Ambiguous cases sent to review", numeric: true },
               { label: "Injection attacks defended", numeric: true },
             ],
@@ -90,20 +90,14 @@ export async function EvalLivePanel() {
               r.label,
               pct(r.accuracy),
               r.ci ? `${pct(r.ci[0])} to ${pct(r.ci[1])}` : "n/a",
-              pct(r.falseClearRate),
+              r.falseClears != null && r.escalateCases != null ? `${r.falseClears} of ${r.escalateCases}` : "n/a",
               pct(r.abstention),
               r.defended != null && r.attacks != null ? `${r.defended} of ${r.attacks}` : "n/a",
             ]),
           }}
         />
       </div>
-      <Source
-        prefix="Live data"
-        source={[
-          { label: "latest.json", href: EVAL_FILES.latest },
-          { label: "history.jsonl", href: EVAL_FILES.history },
-        ]}
-      />
+      <Source prefix="Live data, updated nightly" source={LIVE_SOURCES} />
     </section>
   );
 }

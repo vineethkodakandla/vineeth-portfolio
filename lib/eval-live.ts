@@ -53,9 +53,16 @@ const latestSchema = z
     models: z.array(z.object({ id: z.string(), label: z.string().optional() }).passthrough()),
     tracks: z
       .object({
-        autopilot: z.object({ n_cases: z.number().optional(), per_model: z.array(autopilotModel) }).passthrough().optional(),
+        autopilot: z
+          .object({ n_cases: z.number().optional(), escalate_base_rate: num, per_model: z.array(autopilotModel) })
+          .passthrough()
+          .optional(),
         robustness: z.object({ n_attacks: z.number().optional(), per_model: z.array(robustnessModel) }).passthrough().optional(),
         capability: z.object({ per_model: z.array(perModel) }).passthrough().optional(),
+        judge: z
+          .object({ judges: z.array(z.string()).optional(), per_judge: z.array(perModel) })
+          .passthrough()
+          .optional(),
       })
       .passthrough(),
   })
@@ -67,7 +74,9 @@ export type ModelRow = {
   accuracy: number | null;
   ci: [number, number] | null;
   cases: number | null;
-  falseClearRate: number | null;
+  /** Escalate cases this model cleared, out of `escalateCases`. */
+  falseClears: number | null;
+  escalateCases: number | null;
   abstention: number | null;
   defended: number | null;
   attacks: number | null;
@@ -79,7 +88,10 @@ export type EvalSnapshot = {
   timeLabel: string;
   stale: boolean;
   configured: number;
+  /** Models that returned results in at least one track. */
   completed: number;
+  /** Models present in every track the snapshot has, the judge track included. */
+  allTracks: number;
   rows: ModelRow[];
   nightsWithData: number | null;
 };
@@ -157,17 +169,36 @@ export async function getEvalSnapshot(): Promise<EvalSnapshot | null> {
     return null;
   }
   const latest = parsed.data;
+  const tracks = latest.tracks;
 
   const labels = new Map(latest.models.map((m) => [m.id, m.label ?? m.id]));
-  const robustness = new Map((latest.tracks.robustness?.per_model ?? []).map((r) => [r.model, r]));
+  const robustness = new Map((tracks.robustness?.per_model ?? []).map((r) => [r.model, r]));
   const completedIds = new Set<string>([
-    ...(latest.tracks.autopilot?.per_model ?? []).map((m) => m.model),
-    ...(latest.tracks.robustness?.per_model ?? []).map((m) => m.model),
-    ...(latest.tracks.capability?.per_model ?? []).map((m) => m.model),
+    ...(tracks.autopilot?.per_model ?? []).map((m) => m.model),
+    ...(tracks.robustness?.per_model ?? []).map((m) => m.model),
+    ...(tracks.capability?.per_model ?? []).map((m) => m.model),
+    ...(tracks.judge?.per_judge ?? []).map((m) => m.model),
   ]);
 
+  // Every configured model also runs as a judge (tracks.judge.judges lists only the
+  // judges that returned results), so a model finished all of its tracks only if it
+  // appears in each track the snapshot has, the judge track included.
+  const trackSets = [
+    tracks.autopilot?.per_model,
+    tracks.robustness?.per_model,
+    tracks.capability?.per_model,
+    tracks.judge?.per_judge,
+  ]
+    .filter((list): list is { model: string }[] => Array.isArray(list))
+    .map((list) => new Set(list.map((m) => m.model)));
+  const allTracks = [...completedIds].filter((id) => trackSets.every((s) => s.has(id))).length;
+
+  const nCases = tracks.autopilot?.n_cases ?? null;
+  const baseRate = tracks.autopilot?.escalate_base_rate ?? null;
+  const escalateCases = nCases != null && baseRate != null ? Math.round(nCases * baseRate) : null;
+
   const rows: ModelRow[] = [...completedIds].map((id) => {
-    const a = latest.tracks.autopilot?.per_model.find((m) => m.model === id);
+    const a = tracks.autopilot?.per_model.find((m) => m.model === id);
     const r = robustness.get(id);
     // ci95 is stored as [point, lower, upper].
     const ci = a?.ci95 && a.ci95.length >= 3 ? ([a.ci95[1], a.ci95[2]] as [number, number]) : null;
@@ -176,11 +207,13 @@ export async function getEvalSnapshot(): Promise<EvalSnapshot | null> {
       label: a?.label ?? r?.label ?? labels.get(id) ?? id,
       accuracy: a?.accuracy ?? null,
       ci,
-      cases: a?.n ?? latest.tracks.autopilot?.n_cases ?? null,
-      falseClearRate: a?.false_clear_rate ?? null,
+      cases: a?.n ?? nCases,
+      falseClears:
+        a?.false_clear_rate != null && escalateCases != null ? Math.round(a.false_clear_rate * escalateCases) : null,
+      escalateCases: a ? escalateCases : null,
       abstention: a?.abstention_accuracy ?? null,
       defended: r?.defended ?? null,
-      attacks: r?.n ?? latest.tracks.robustness?.n_attacks ?? null,
+      attacks: r?.n ?? tracks.robustness?.n_attacks ?? null,
     };
   });
   rows.sort((x, y) => (y.accuracy ?? -1) - (x.accuracy ?? -1));
@@ -194,6 +227,7 @@ export async function getEvalSnapshot(): Promise<EvalSnapshot | null> {
     stale: Date.now() - Date.parse(latest.generated_at) > 1.5 * DAY,
     configured: latest.models.length,
     completed: completedIds.size,
+    allTracks,
     rows,
     nightsWithData: history == null ? null : countNights(history, latest.generated_at),
   };

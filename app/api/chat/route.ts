@@ -79,8 +79,14 @@ export async function POST(req: Request) {
   }
 
   const messages: Anthropic.MessageParam[] = history.map((m) => ({ role: m.role, content: m.content }));
-  const question = history[history.length - 1].content;
-  const { chunks, mode } = await retrieve(question, 5);
+  // Retrieve for the last two questions together, so a follow-up such as "and on
+  // the CPU?" still finds the passages the conversation is about.
+  const query = history
+    .filter((m) => m.role === "user")
+    .slice(-2)
+    .map((m) => m.content)
+    .join("\n");
+  const { chunks, mode } = await retrieve(query, 5);
   const system = SYSTEM(buildContext(chunks));
   // Sources are shown only for real retrieval; in full-context mode every chunk
   // is in the prompt and listing all of them would say nothing.
@@ -114,7 +120,8 @@ export async function POST(req: Request) {
           stopReason = (await s.finalMessage()).stop_reason;
         }
         if (stopReason === "refusal") {
-          onText("\n\nI can't help with that one. The contact section has other ways to reach Vineeth.");
+          // The client replaces any partial answer with its refusal message.
+          onText("\n[[refusal]]\n");
         }
       } catch (err) {
         Sentry.captureException(err);

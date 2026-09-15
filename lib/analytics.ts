@@ -1,8 +1,9 @@
 import { sql } from "@/lib/db";
 import { redis } from "@/lib/ratelimit";
 
-// Project ids that have a view counter on the page.
-export const PROJECTS = ["edith", "pathwise", "pathfinders"] as const;
+// Project ids that /api/track accepts a view count for. The site's own beacon
+// sends page views per path only, so these stay at zero unless something posts them.
+export const PROJECTS = ["bitwise-forensics", "meteor-lake-latency-lab", "llm-eval-observatory", "edith", "ananta"] as const;
 export type Counts = { site: number; projects: Record<string, number> };
 
 // Page view: full event log in Postgres (for analytics), hot total in Redis.

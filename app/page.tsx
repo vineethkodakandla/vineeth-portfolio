@@ -109,7 +109,10 @@ export default function Home() {
             GitHub
           </a>
         </div>
-        <p className="availability">Open to ML engineer, inference and software engineering roles. Based in New Jersey.</p>
+        <p className="availability">
+          Open to ML engineer, inference and software engineering roles. Based in New Jersey, open to relocation and
+          remote work.
+        </p>
       </section>
 
       <section id="work" className="section" aria-labelledby="work-title">
@@ -197,7 +200,7 @@ export default function Home() {
             </p>
             <p>
               I like small, inspectable builds as well, like the two browser demos above, and the assistant on this
-              site, which answers questions about my work from the same material you are reading.
+              site, which answers questions about my work from a short knowledge base written to match these pages.
             </p>
           </div>
         </div>

@@ -4,8 +4,9 @@ import { Source } from "@/components/Source";
 import { repoUrl, src } from "@/content/sources";
 import type { CaseStudy } from "./types";
 
-// Static claims below are pinned to 1d349fd (the results commit of 15 Sep 2026)
-// and dated in the text. The live panel reads the moving file on main.
+// Static claims below are pinned to bf8ad56 (15 Sep 2026; its real result rows
+// match the 1d349fd results commit) and dated in the text. The live panel reads
+// the moving file on main.
 
 function Body() {
   return (
@@ -27,8 +28,9 @@ function Body() {
             and was cleared.
           </li>
           <li>
-            Every score carries a bootstrap interval, and a drift flag fires only when a score moves 5 points or more
-            and the intervals separate.
+            Decision accuracy, injection defense, capability accuracy and judge agreement carry bootstrap intervals; the
+            false-clear rate and the other rates are exact ratios without one. For the first three, a drift flag fires
+            only when the score moves 5 points or more and the intervals separate.
           </li>
         </ul>
       </section>
@@ -77,6 +79,8 @@ function Body() {
           source={[
             src("evals", "eval/data/kyc_cases.jsonl"),
             src("evals", "eval/data/attacks.jsonl"),
+            src("evals", "eval/data/capability.jsonl"),
+            src("evals", "eval/data/judge_labels.jsonl"),
             src("evals", "eval/grading.py", [142, 164]),
             src("evals", "eval/tracks/judge.py"),
           ]}
@@ -114,33 +118,45 @@ function Body() {
         <p>
           From 2 August to 15 September 2026, GPT-OSS 120B completed the triage track on 29 nights and never cleared a
           case that should have been escalated. Its accuracy on the same 26 cases moved between 92.3% and 100% from
-          night to night, which is a reason to report intervals and trends rather than one run. On the injection set it
-          defended 93.3% to 96.7% of attacks over 31 nights; Llama 3.3 70B defended 73.3% to 83.3% over the 19 nights
-          it completed.
+          night to night, which is a reason to report intervals and trends rather than one run. Counting from the first
+          live run on 28 July, it defended 93.3% to 96.7% of injection attacks over 31 nights; Llama 3.3 70B defended
+          73.3% to 83.3% over the 19 nights it completed, the last on 17 August. Groq&apos;s deprecations page lists
+          both Llama models as shut down on 16 August, and every nightly run from 18 August got HTTP 404 for them. On
+          15 September the configuration was cut to the two GPT-OSS models, the only production open-weight chat
+          models left on the free tier.
         </p>
         <p>
-          <Source source={src("evals", "public/data/history.jsonl")} />
+          <Source source={[src("evals", "public/data/history.jsonl"), src("evals", "eval/models.yaml", [3, 12])]} />
         </p>
         <p>
-          The pipeline is honest about its own gaps. A model is skipped for the night when Groq&apos;s free tier
-          returns an error or rate-limits it, and the panel above reports how many configured models finished and how
-          many recent nights produced results at all.
+          When Groq no longer serves a model, rejects its requests or keeps rate-limiting it, that model is dropped for
+          the rest of the run, so it keeps the tracks it already finished and misses the rest. The panel above reports
+          how many configured models returned results, how many finished all of their tracks, and how many recent nights
+          produced results at all.
         </p>
 
         <h2>What this does not show</h2>
         <ul className="limits">
           <li>The cases are synthetic and written by me. This is not a compliance benchmark, and real alerts are messier.</li>
           <li>
-            Samples are small. With 4 ambiguous cases, the review-routing score moves in 25-point steps, and at 100% a
-            bootstrap interval collapses to a single point.
+            Samples are small. With 4 ambiguous cases, the review-routing score moves in 25-point steps and has no
+            interval. When an accuracy, defense or agreement score reaches 100%, its bootstrap interval collapses to a
+            single point, which understates the real uncertainty.
           </li>
           <li>
-            Several scores sit at the ceiling. The judge items are too easy to separate the two GPT-OSS judges, which
-            also come from one vendor.
+            Several scores sit at the ceiling. On recent nights both GPT-OSS judges agreed with every human label
+            (agreement 100%, and a Fleiss&apos; kappa of 1.0 between the two judges), so the judge items are too easy to separate them, and both judges come from one
+            vendor.
           </li>
-          <li>Drift is compared only with the previous night.</li>
+          <li>
+            Drift is compared only with the most recent run that produced results, which can be several nights earlier,
+            and a model missing from that run gets no drift check.
+          </li>
           <li>Which models are measured on a given night depends on free-tier availability.</li>
         </ul>
+        <p>
+          <Source prefix="Judge results" source={src("evals", "public/data/latest.json")} />
+        </p>
       </div>
     </>
   );
@@ -153,7 +169,7 @@ const evalObservatory: CaseStudy = {
   deck:
     "Can an open-weight model triage anti-money-laundering alerts without a person checking every case? A nightly evaluation that commits its results with intervals, so the numbers can be checked.",
   description:
-    "Nightly LLM evaluation on GitHub Actions: AML alert triage scored by a fixed parser, prompt-injection robustness, capability drift and LLM-as-judge reliability, with bootstrap intervals.",
+    "Nightly LLM evaluation on GitHub Actions: AML alert triage scored by a fixed parser, prompt-injection robustness, capability drift and LLM-as-judge reliability, with bootstrap intervals on the headline scores.",
   meta: ["Real results since 28 Jul 2026", "Python, GitHub Actions, Next.js", "Groq free tier"],
   links: [
     { label: "Dashboard", href: "https://llm-eval-observatory.vercel.app" },

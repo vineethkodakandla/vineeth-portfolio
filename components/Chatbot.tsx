@@ -14,10 +14,24 @@ const SUGGESTIONS = [
 ];
 
 const GREETING =
-  "Hi. I answer questions about Vineeth's work from the content of this site. Ask about a project, his experience, or what he is looking for.";
+  "Hi. I answer questions about Vineeth's work from a short knowledge base written to match this site. Ask about a project, his experience, or what he is looking for.";
 
 // Matches the server's per-message limit (lib/validation.ts).
 const MAX_TURN_CHARS = 2000;
+
+// Sent by the chat route when the model declines mid-answer; the partial text is
+// then replaced rather than left on screen above a note.
+const REFUSAL_MARK = "[[refusal]]";
+const REFUSAL_TEXT = "I can't help with that one. The contact section has other ways to reach Vineeth.";
+const MARK_WITH_BREAK = "\n" + REFUSAL_MARK;
+
+// While the stream is open, hold back text that could be the start of the marker.
+function holdBack(s: string) {
+  for (let k = Math.min(MARK_WITH_BREAK.length - 1, s.length); k > 0; k--) {
+    if (s.endsWith(MARK_WITH_BREAK.slice(0, k))) return s.slice(0, -k);
+  }
+  return s;
+}
 
 // Where each knowledge-base chunk lives on the site, so a source chip can link to it.
 // scripts/check-content.mjs checks these keys against data/knowledge.json.
@@ -147,14 +161,17 @@ export default function Chatbot() {
       let raw = "";
       let delim = -1;
       let answer = "";
+      let refused = false;
       let sources: Source[] | undefined;
       while (true) {
         const { value, done } = await reader.read();
-        if (done) break;
-        raw += dec.decode(value, { stream: true });
+        raw += done ? dec.decode() : dec.decode(value, { stream: true });
         if (delim === -1) {
           delim = raw.indexOf("\n");
-          if (delim === -1) continue;
+          if (delim === -1) {
+            if (done) break;
+            continue;
+          }
           try {
             const meta = JSON.parse(raw.slice(0, delim));
             if (meta?.type === "sources") sources = meta.sources;
@@ -162,11 +179,20 @@ export default function Chatbot() {
             /* not a preamble; drop the first line */
           }
         }
-        answer = raw.slice(delim + 1);
+        const body = raw.slice(delim + 1);
+        if (body.includes(REFUSAL_MARK)) {
+          refused = true;
+          if (!done) await reader.cancel().catch(() => {});
+          break;
+        }
+        // Once the stream has ended nothing more can arrive, so show all of it.
+        answer = done ? body : holdBack(body);
         replaceLast({ role: "assistant", content: answer, sources });
+        if (done) break;
       }
 
-      if (!answer.trim()) fail("I did not get an answer that time. Please ask again.");
+      if (refused) fail(REFUSAL_TEXT);
+      else if (!answer.trim()) fail("I did not get an answer that time. Please ask again.");
       else setAnnounce(answer);
     } catch {
       fail("Network problem. Please try again.");
@@ -196,7 +222,7 @@ export default function Chatbot() {
           <div className="title" id="cb-title">
             Ask about my work
           </div>
-          <div className="sub">Answers are written by Claude from passages of this site.</div>
+          <div className="sub">Answers are written by Claude from this site&apos;s knowledge base.</div>
         </div>
         <button className="icon-button x" onClick={dismiss} aria-label="Close assistant">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">

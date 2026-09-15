@@ -10,8 +10,8 @@ const OWNER = "vineethkodakandla";
 export const REPOS = {
   bitwise: {
     name: "bitwise-forensics",
-    sha: "457daaeaa28e7a2292674856ad4e6cfcc3edfa3f",
-    tag: "v0.3.0",
+    sha: "6aa651d45ec2a24bbd9080521999218c877a5e37",
+    tag: "v0.3.1",
   },
   edge: {
     name: "edge-vision-lab",
@@ -19,7 +19,7 @@ export const REPOS = {
   },
   evals: {
     name: "llm-eval-observatory",
-    sha: "1d349fd0f373b0fd4471c690fcd77558c685691c",
+    sha: "bf8ad56b9899e24b72eba02a52c98a768f0854de",
   },
   edith: {
     name: "edith-lab",

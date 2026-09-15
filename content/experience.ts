@@ -1,7 +1,7 @@
 // Employment and education. This is a public, archivable page, so it carries a
-// strict subset of the resume: company, place, dates and what the work was.
-// No job titles, seniority verbs, team scope or internal figures. Internal
-// numbers cannot link to a public file, so they stay off this site.
+// strict subset of the resume: company, place, years and what the work was.
+// No job titles, seniority verbs, team scope, internal figures or exact months.
+// Internal numbers cannot link to a public file, so they stay off this site.
 // Before adding anything here, check it against
 // RESUME_APPLY/SILICON/INFERENCE_ENGINEER/SOURCE_Work_Experience_2022-2024.v2.md
 // and its DO NOT SAY list.
@@ -17,16 +17,16 @@ export const ROLES: Entry[] = [
   {
     org: "EXL",
     place: "Noida, India",
-    dates: "Sep 2023 to Aug 2024",
+    dates: "2023 to 2024",
     summary:
       "LLM serving for insurance underwriting and claims work. I worked on the Amazon Bedrock serving path (prompt routing, context-window management and token streaming), on evaluation runs that compared fine-tuned models with commercial models, and on the latency and cost dashboards the team used. I contributed pre-launch engineering to LDS Underwriting Assist, which EXL launched in August 2024.",
   },
   {
     org: "L&T Technology Services",
     place: "Bengaluru, India",
-    dates: "Jan 2022 to Jul 2023",
+    dates: "2022 to 2023",
     summary:
-      "Real-time inference for endoscopy video, covering image enhancement and polyp detection, on NVIDIA's Holoscan SDK and developer kits. I moved models from PyTorch to ONNX Runtime and TensorRT with FP16 and INT8 quantization checked against FP32, restructured the input pipeline to cut per-frame latency, and wrote the benchmarking scripts used to compare edge targets. I started there as an intern.",
+      "Real-time inference for endoscopy video, covering image enhancement and polyp detection, on NVIDIA's Holoscan SDK and developer kits. I moved models from PyTorch to ONNX Runtime and TensorRT, enabling FP16 where supported, restructured the input pipeline to cut per-frame latency, and wrote the benchmarking scripts used to compare edge targets. I started there as an intern.",
   },
 ];
 
